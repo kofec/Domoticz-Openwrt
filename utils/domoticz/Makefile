@@ -9,8 +9,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=domoticz
 PKG_VERSION_MAJOR:=4
-PKG_VERSION_PATCH:=10549
-PKG_COMMIT:=b7b71f1fbdd631fe0a9c9e54f8e0eb59e4c03523
+PKG_VERSION_PATCH:=10835
+PKG_COMMIT:=5a198fa54655f000a7aff316b56744d9e2d11709
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
 PKG_RELEASE:=1
 
@@ -22,7 +22,7 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
 PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/$(PKG_SOURCE)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
 endif
-PKG_HASH:=7b09f55f1d4b6b13a695f2eea5d462e26311cb103f631a887678308deb8a6dcc
+PKG_HASH:=730e7260b45b6d9ff5a1b4f8b79078ee7f695b98edea6463a916859fab32e31d
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
@@ -70,7 +70,9 @@ CMAKE_OPTIONS += \
 	-DUSE_STATIC_OPENZWAVE=no \
 	-DUSE_OPENSSL_STATIC=no \
 	-DUSE_PYTHON=yes \
-	-DWITH_LIBUSB=no
+	-DWITH_LIBUSB=no \
+	-DBoost_NO_BOOST_CMAKE=yes \
+	-DBUILD_SHARED_LIBS=yes
 
 TARGET_CFLAGS+=-flto
 TARGET_CXXFLAGS+=-DWITH_GPIO -flto
@@ -78,14 +80,11 @@ TARGET_CXXFLAGS+=-DWITH_GPIO -flto
 define Build/Prepare
 	$(call Build/Prepare/Default)
 	# Fix APPVERSION/APPDATE since we don't build from a git tree
-	sed -i 's/#define APPVERSION.*/#define APPVERSION $(PKG_VERSION_PATCH)/' \
-		 $(PKG_BUILD_DIR)/appversion.default
 	COMMITDATE=`tar tvfz $(DL_DIR)/$(PKG_SOURCE) --full-time | sed 's/.* \(20..-..-.. ..:..:..\) domoticz-.*/\1/;q'`; \
 	COMMITTS=`date --date="$$$${COMMITDATE}" +%s`; \
-	sed -i "s/#define APPDATE.*/#define APPDATE $$$${COMMITTS}/" $(PKG_BUILD_DIR)/appversion.default
-ifneq ($(PKG_COMMIT),)
-	sed -i "s/#define APPHASH.*/#define APPHASH \"$(shell echo $(PKG_COMMIT) | cut -c1-8)\"/" $(PKG_BUILD_DIR)/appversion.default
-endif
+	sed -i "s/xxx 2019/$$$${COMMITDATE}/" $(PKG_BUILD_DIR)/History.txt
+	sed -i 's/Version 4.xxxxx/Version 4.$(PKG_VERSION_PATCH)/' \
+                 $(PKG_BUILD_DIR)/History.txt
 	# Remove unwanted scripts
 	cd $(PKG_BUILD_DIR)/scripts && rm -rf \
 		buienradar_rain_example.pl \
