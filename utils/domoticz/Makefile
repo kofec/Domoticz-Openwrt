@@ -9,8 +9,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=domoticz
 PKG_VERSION_MAJOR:=4
-PKG_VERSION_PATCH:=10835
-PKG_COMMIT:=5a198fa54655f000a7aff316b56744d9e2d11709
+PKG_VERSION_PATCH:=10841
+PKG_COMMIT:=5afd0eb96dd5e6156d71c43a3ae430713e45445b
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
 PKG_RELEASE:=1
 
@@ -22,7 +22,7 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
 PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/$(PKG_SOURCE)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
 endif
-PKG_HASH:=730e7260b45b6d9ff5a1b4f8b79078ee7f695b98edea6463a916859fab32e31d
+PKG_HASH:=e60962d561d67d2ccf1c40c6f9ed8e915c0ca9ce2805cb832e1c1404e5725b77
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
@@ -80,11 +80,16 @@ TARGET_CXXFLAGS+=-DWITH_GPIO -flto
 define Build/Prepare
 	$(call Build/Prepare/Default)
 	# Fix APPVERSION/APPDATE since we don't build from a git tree
+	sed -i 's|#define APPVERSION.[^\]*\\|#define APPVERSION $(PKG_VERSION_PATCH)\\|' \
+		 $(PKG_BUILD_DIR)/getgit.cmake
 	COMMITDATE=`tar tvfz $(DL_DIR)/$(PKG_SOURCE) --full-time | sed 's/.* \(20..-..-.. ..:..:..\) domoticz-.*/\1/;q'`; \
 	COMMITTS=`date --date="$$$${COMMITDATE}" +%s`; \
-	sed -i "s/xxx 2019/$$$${COMMITDATE}/" $(PKG_BUILD_DIR)/History.txt
-	sed -i 's/Version 4.xxxxx/Version 4.$(PKG_VERSION_PATCH)/' \
-                 $(PKG_BUILD_DIR)/History.txt
+	sed -i "s/#define APPDATE.*/#define APPDATE $$$${COMMITTS}\\\n\")/" $(PKG_BUILD_DIR)/getgit.cmake
+ifneq ($(PKG_COMMIT),)
+	sed -i "s/#define APPHASH.[^n]*n/#define APPHASH \"$(shell echo $(PKG_COMMIT) | cut -c1-8)\"\\\n/" $(PKG_BUILD_DIR)/getgit.cmake
+	sed -i "s/#define APPHASH /#define APPHASH \\\/" $(PKG_BUILD_DIR)/getgit.cmake
+	sed -i "s/$(shell echo $(PKG_COMMIT) | cut -c1-8)/$(shell echo $(PKG_COMMIT) | cut -c1-8)\\\/" $(PKG_BUILD_DIR)/getgit.cmake
+endif
 	# Remove unwanted scripts
 	cd $(PKG_BUILD_DIR)/scripts && rm -rf \
 		buienradar_rain_example.pl \
