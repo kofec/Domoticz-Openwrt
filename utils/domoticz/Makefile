@@ -9,8 +9,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=domoticz
 PKG_VERSION_MAJOR:=4
-PKG_VERSION_PATCH:=10841
-PKG_COMMIT:=5afd0eb96dd5e6156d71c43a3ae430713e45445b
+PKG_VERSION_PATCH:=11229
+PKG_COMMIT:=a8ae4761dff373407ac142539dcd1b7a5de51e84
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
 PKG_RELEASE:=1
 
@@ -22,7 +22,7 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
 PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/$(PKG_SOURCE)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
 endif
-PKG_HASH:=e60962d561d67d2ccf1c40c6f9ed8e915c0ca9ce2805cb832e1c1404e5725b77
+PKG_HASH:=53df49ff1f3a0974e02088913b7d0cf47a4be744faa77e9b6180bba00c5d9abb
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
@@ -62,6 +62,8 @@ define Package/domoticz/description
 endef
 
 CMAKE_OPTIONS += \
+	-DBUILD_SHARED_LIBS=yes \
+	-DBoost_NO_BOOST_CMAKE=yes \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DUSE_BUILTIN_MQTT=no \
 	-DUSE_BUILTIN_SQLITE=no \
@@ -70,9 +72,7 @@ CMAKE_OPTIONS += \
 	-DUSE_STATIC_OPENZWAVE=no \
 	-DUSE_OPENSSL_STATIC=no \
 	-DUSE_PYTHON=yes \
-	-DWITH_LIBUSB=no \
-	-DBoost_NO_BOOST_CMAKE=yes \
-	-DBUILD_SHARED_LIBS=yes
+	-DWITH_LIBUSB=no
 
 TARGET_CFLAGS+=-flto
 TARGET_CXXFLAGS+=-DWITH_GPIO -flto
@@ -100,7 +100,6 @@ endif
 		logrotate/ \
 		lua_parsers/example* \
 		lua/*demo.lua \
-		python/ \
 		readme.txt \
 		restart_domoticz \
 		templates/All.Python \
