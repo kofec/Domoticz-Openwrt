@@ -9,8 +9,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=domoticz
 PKG_VERSION_MAJOR:=4
-PKG_VERSION_PATCH:=11352
-PKG_COMMIT:=52980957db04233042cecf9e101ed74f6ded953f
+PKG_VERSION_PATCH:=11547
+PKG_COMMIT:=db289ac2586f796e66c25bebcd57b0dc52edb7ac
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
 PKG_RELEASE:=1
 
@@ -22,7 +22,7 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
 PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/$(PKG_SOURCE)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
 endif
-PKG_HASH:=d5958a16e00afea86bc3a4b9e449ec7a4052b51d6664d32a00cb080fd9bf6036
+PKG_HASH:=cf78d9ad69a7ab16ed8e7a0c5b6f69de7600972720763e0799174329cd4fd36d
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
@@ -51,7 +51,6 @@ define Package/domoticz
 	+libcurl \
 	+libmosquittopp \
 	+libopenssl \
-	+libopenzwave \
 	+libsqlite3 \
 	+libstdcpp \
 	+zlib
@@ -69,7 +68,6 @@ CMAKE_OPTIONS += \
 	-DUSE_BUILTIN_SQLITE=no \
 	-DUSE_STATIC_BOOST=no \
 	-DUSE_STATIC_LIBSTDCXX=no \
-	-DUSE_STATIC_OPENZWAVE=no \
 	-DUSE_OPENSSL_STATIC=no \
 	-DUSE_PYTHON=yes \
 	-DWITH_LIBUSB=no

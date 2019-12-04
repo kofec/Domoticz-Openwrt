@@ -1,0 +1,29 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -694,18 +694,6 @@ endif(WITH_LIBUSB)
+ # OpenZWave
+ # try to find open-zwave, if found, include support
+ #
+-option(USE_STATIC_OPENZWAVE "Build with static OpenZwave libraries" YES)
+-if(USE_STATIC_OPENZWAVE)
+-  find_library(OpenZWave NAMES libopenzwave.a HINTS "../open-zwave-read-only" "../open-zwave-read-only/cpp/build")
+-  set(OPENZWAVE_LIB ${OpenZWave})
+-else()
+-  pkg_check_modules(OPENZWAVE libopenzwave)
+-  if(OPENZWAVE_FOUND)
+-    MESSAGE(STATUS "==== OpenZWave package found!")
+-    find_library(OpenZWave NAMES libopenzwave.so HINTS ${OPENZWAVE_LIBRARY_DIRS})
+-    message(STATUS ${OpenZWave})
+-  endif()
+-endif()
+ IF(OpenZWave)
+   message(STATUS ${OpenZWave})
+   target_link_libraries(domoticz ${OpenZWave})
+@@ -724,7 +712,6 @@ ELSE()
+ ENDIF()
+ 
+ 
+-find_path(TELLDUSCORE_INCLUDE NAMES telldus-core.h)
+ if (TELLDUSCORE_INCLUDE)
+   message(STATUS "Found telldus-core (telldus-core.h) at : ${TELLDUSCORE_INCLUDE}")
+   find_library(TELLDUS_LIBRARIES NAMES libtelldus-core.so)
