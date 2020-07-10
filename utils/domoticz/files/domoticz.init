@@ -74,18 +74,32 @@ start_service() {
 }
 
 findLatestDatabase() {
-	destinationFolder=$1
-	yourfilenames=`ls /root/domoticz*[0-9].db`
-	LatestDate=0
-	for eachfile in $yourfilenames
-	do
-   	   echo $eachfile
-   	   if [[ "${eachfile//[!0-9]/}" > "$LatestDate" ]]; then
-      		LatestDate=${eachfile//[!0-9]/}
-   	   fi
-	done
-	if [ "$LatestDate" -gt "0" ]; then
-	    cp "/root/domoticz${LatestDate}.db" "${destinationFolder}domoticz.db"
-	fi
+# /proc/uptime
+# This file contains two numbers: the uptime of the system
+# (seconds), and the amount of time spent in idle process
+# (seconds).
+  Uptime="$(cat /proc/uptime)"
+	Uptime="${Uptime%%.*}"
+	if [ "$Uptime" -lt "120" ]; then
+    destinationFolder=$1
+    yourfilenames=`ls /root/domoticz*[0-9].db`
+    local yourfilenames_res=$?
+    if [ "$yourfilenames_res" -eg "0" ]; then
+      LatestDate=0
+      for eachfile in $yourfilenames
+      do
+           echo $eachfile
+           if [[ "${eachfile//[!0-9]/}" > "$LatestDate" ]]; then
+              LatestDate=${eachfile//[!0-9]/}
+           fi
+      done
+      if [ "$LatestDate" -gt "0" ]; then
+         if [ -d "$destinationFolder" ]; then
+           cp "/root/domoticz${LatestDate}.db" "${destinationFolder}domoticz.db"
+           logger "Domoticz copy: /root/domoticz${LatestDate}.db to ${destinationFolder}domoticz.db"
+         fi
+      fi
+    fi
+  fi
 }
 
