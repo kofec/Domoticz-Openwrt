@@ -86,7 +86,7 @@ findLatestDatabase() {
 		destinationFolder=$1
 		yourfilenames=`ls /root/domoticz*[0-9].db`
 		local yourfilenames_res=$?
-		if [ "$yourfilenames_res" -eg "0" ]; then
+		if [ "$yourfilenames_res" -eq "0" ]; then
 			LatestDate=0
 			for eachfile in $yourfilenames
 			do
