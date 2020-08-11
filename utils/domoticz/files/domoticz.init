@@ -23,11 +23,13 @@ start_domoticz() {
 
 	[ -d "${userdata}" ] || {
 		mkdir -p "${userdata}"
-		findLatestDatabase "$userdata"
 		chmod 0770 "$userdata"
 		chown domoticz:domoticz "$userdata"
 
 	}
+
+	# Search latest database
+	findLatestDatabase "$userdata"
 
 	# By default, ${userdata}/scripts is a symlink to /etc/domoticz/scripts
 	# and the two dzVents directories under there which Domoticz will actually
@@ -78,28 +80,30 @@ findLatestDatabase() {
 # This file contains two numbers: the uptime of the system
 # (seconds), and the amount of time spent in idle process
 # (seconds).
-  Uptime="$(cat /proc/uptime)"
+	Uptime="$(cat /proc/uptime)"
 	Uptime="${Uptime%%.*}"
 	if [ "$Uptime" -lt "120" ]; then
-    destinationFolder=$1
-    yourfilenames=`ls /root/domoticz*[0-9].db`
-    local yourfilenames_res=$?
-    if [ "$yourfilenames_res" -eg "0" ]; then
-      LatestDate=0
-      for eachfile in $yourfilenames
-      do
-           echo $eachfile
-           if [[ "${eachfile//[!0-9]/}" > "$LatestDate" ]]; then
-              LatestDate=${eachfile//[!0-9]/}
-           fi
-      done
-      if [ "$LatestDate" -gt "0" ]; then
-         if [ -d "$destinationFolder" ]; then
-           cp "/root/domoticz${LatestDate}.db" "${destinationFolder}domoticz.db"
-           logger "Domoticz copy: /root/domoticz${LatestDate}.db to ${destinationFolder}domoticz.db"
-         fi
-      fi
-    fi
-  fi
+		destinationFolder=$1
+		yourfilenames=`ls /root/domoticz*[0-9].db`
+		local yourfilenames_res=$?
+		if [ "$yourfilenames_res" -eg "0" ]; then
+			LatestDate=0
+			for eachfile in $yourfilenames
+			do
+				echo $eachfile
+				if [[ "${eachfile//[!0-9]/}" > "$LatestDate" ]]; then
+					LatestDate=${eachfile//[!0-9]/}
+				fi
+			done
+			if [ "$LatestDate" -gt "0" ]; then
+				if [ -d "$destinationFolder" ]; then
+					cp "/root/domoticz${LatestDate}.db" "${destinationFolder}domoticz.db"
+					chmod 0770 "$destinationFolder"
+					chown domoticz:domoticz "$destinationFolder"
+				fi
+			fi
+		fi
+	else
+		logger "Uptime over 120s - $Uptime" -t Domoticz
+	fi
 }
-
