@@ -91,7 +91,7 @@ findLatestDatabase() {
 			for eachfile in $yourfilenames
 			do
 				echo $eachfile
-				if [[ "${eachfile//[!0-9]/}" > "$LatestDate" ]]; then
+				if [ "${eachfile//[!0-9]/}" -gt "$LatestDate" ]; then
 					LatestDate=${eachfile//[!0-9]/}
 				fi
 			done
