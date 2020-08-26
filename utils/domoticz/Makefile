@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016 - 2017  Stijn Tintel <stijn@linux-ipv6.be>
+# Copyright (C) 2016 - 2020  Stijn Tintel <stijn@linux-ipv6.be>
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,26 +8,27 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=domoticz
-PKG_VERSION_MAJOR:=2020.1
-PKG_VERSION_PATCH:=11835
-PKG_COMMIT:=d93f467a7b149514783f83c8e9119130ba612d42
+PKG_VERSION_MAJOR:=2020.2
+PKG_VERSION_PATCH:=12279
+PKG_COMMIT:=805fee10fd609a02182eaa01e99bcb4b1b560426
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
 PKG_RELEASE:=1
 
 ifeq ($(PKG_COMMIT),)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_VERSION)/$(PKG_SOURCE)
+PKG_HASH:=a02f589daad4eebff1f5e93815c1acd1864cf068f8f5c3185bcdd20207ae395e
 else
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
 PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/$(PKG_SOURCE)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
+PKG_HASH:=acd5227c8ee69b3fd3fbda8224d682eb04bb5c076be229c1bdfb9934c3a41cc8
 endif
-PKG_HASH:=c5ff71c6b96e6bc81d28ac553213d4ba6d73b8c1dc5304c732228a066b2f1ace
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
 
-PKG_BUILD_DEPENDS:=python3
+PKG_BUILD_DEPENDS:=python3 minizip cereal
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
@@ -41,15 +42,18 @@ define Package/domoticz
   CATEGORY:=Utilities
   TITLE:=Open Source Home Automation System
   URL:=http://domoticz.com/
-  MAINTAINER:=Stijn Tintel <stijn@linux-ipv6.be>
+  MAINTAINER:=David Woodhouse <dwmw2@infradead.org>
   USERID:=domoticz=6144:domoticz=6144
   DEPENDS:= \
 	+boost \
 	+boost-date_time \
 	+boost-system \
 	+boost-thread \
+	+jsoncpp \
 	+libcurl \
-	+libmosquittopp \
+	+minizip \
+	+lua5.3 \
+	+libmosquitto \
 	+libopenssl \
 	+libsqlite3 \
 	+libstdcpp \
@@ -66,14 +70,18 @@ CMAKE_OPTIONS += \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DUSE_BUILTIN_MQTT=no \
 	-DUSE_BUILTIN_SQLITE=no \
+	-DUSE_BUILTIN_JSONCPP=no \
+	-DUSE_BUILTIN_MINIZIP=no \
+	-DUSE_LUA_STATIC=no \
 	-DUSE_STATIC_BOOST=no \
 	-DUSE_STATIC_LIBSTDCXX=no \
+	-DUSE_STATIC_OPENZWAVE=no \
 	-DUSE_OPENSSL_STATIC=no \
 	-DUSE_PYTHON=yes \
 	-DWITH_LIBUSB=no
 
-TARGET_CFLAGS+=-flto
-TARGET_CXXFLAGS+=-DWITH_GPIO -flto
+TARGET_CFLAGS += -flto -DBOOST_BIND_GLOBAL_PLACEHOLDERS
+TARGET_CXXFLAGS += -DWITH_GPIO -flto
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
@@ -88,6 +96,7 @@ ifneq ($(PKG_COMMIT),)
 	sed -i "s/#define APPHASH /#define APPHASH \\\/" $(PKG_BUILD_DIR)/getgit.cmake
 	sed -i "s/$(shell echo $(PKG_COMMIT) | cut -c1-8)/$(shell echo $(PKG_COMMIT) | cut -c1-8)\\\/" $(PKG_BUILD_DIR)/getgit.cmake
 endif
+
 	# Remove unwanted scripts
 	cd $(PKG_BUILD_DIR)/scripts && rm -rf \
 		buienradar_rain_example.pl \
@@ -98,6 +107,7 @@ endif
 		logrotate/ \
 		lua_parsers/example* \
 		lua/*demo.lua \
+		python/ \
 		readme.txt \
 		restart_domoticz \
 		templates/All.Python \

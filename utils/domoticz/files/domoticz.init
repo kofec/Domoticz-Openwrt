@@ -107,3 +107,4 @@ findLatestDatabase() {
 		logger "Uptime over 120s - $Uptime" -t Domoticz
 	fi
 }
+

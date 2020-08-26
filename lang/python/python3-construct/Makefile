@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=python3-construct
-PKG_VERSION:=2.9.45
+PKG_VERSION:=2.10.56
 PKG_RELEASE:=1
 
 PKG_SOURCE:=construct-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://pypi.io/packages/source/c/construct
-PKG_HASH:=2271a0efd0798679dea825ff47e22a4c550456a5db0ba8baa82f7eae0af0118c
+PKG_HASH:=97ba13edcd98546f10f7555af41c8ce7ae9d8221525ec4062c03f9adbf940661
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/construct-$(PKG_VERSION)
 
