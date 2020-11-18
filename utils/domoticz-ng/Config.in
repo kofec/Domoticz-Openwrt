@@ -1,0 +1,25 @@
+menu "Configuration"
+	depends on PACKAGE_domoticz-ng
+
+config DOMOTICZ-NG_PYTHON3
+	bool "Enable python3 plugins"
+	default y
+	help
+           Use Python for Plugins and Event-Scripts.
+           Enabled by default.
+
+config DOMOTICZ-NG_OPENZWAVE
+	bool "Enable OpenZwave support"
+	default y
+	help
+           Enable OpenZwave.
+           Enabled by default.
+
+config DOMOTICZ-NG_TELLDUS
+	bool "Enable Telldus support"
+	default y
+	help
+           Enable Telldus.
+           Enabled by default.
+		   
+endmenu

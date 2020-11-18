@@ -1,0 +1,28 @@
+Index: domoticz-805fee10fd609a02182eaa01e99bcb4b1b560426/CMakeLists.txt
+===================================================================
+--- domoticz-805fee10fd609a02182eaa01e99bcb4b1b560426.orig/CMakeLists.txt
++++ domoticz-805fee10fd609a02182eaa01e99bcb4b1b560426/CMakeLists.txt
+@@ -28,6 +28,7 @@ option(USE_BUILTIN_SQLITE "Use builtin s
+ # Optional dependencies
+ option(USE_PYTHON "Use Python for Plugins and Event-Scripts" YES)
+ option(USE_OPENZWAVE "Use OpenZWave as Hardware" YES)
++option(USE_TELLDUS "Use Telldus as Hardware" YES)
+ option(INCLUDE_LINUX_I2C "Include I2C support" YES)
+ option(INCLUDE_SPI "Include SPI support" YES)
+ option(WITH_LIBUSB "Enable libusb support" YES)
+@@ -726,6 +727,7 @@ ELSE()
+   message(STATUS "GPIO is not available")
+ ENDIF()
+ 
++IF(USE_TELLDUS)
+ find_path(TELLDUSCORE_INCLUDE NAMES telldus-core.h)
+ IF(TELLDUSCORE_INCLUDE)
+   message(STATUS "Found telldus-core (telldus-core.h) at : ${TELLDUSCORE_INCLUDE}")
+@@ -737,6 +739,7 @@ IF(TELLDUSCORE_INCLUDE)
+ ELSE()
+   message(STATUS "Not found telldus-core (telldus-core.h), not adding tellstick support")
+ ENDIF(TELLDUSCORE_INCLUDE)
++ENDIF(USE_TELLDUS)
+ 
+ target_link_libraries(domoticz ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${MINIZIP_LIBRARIES} ${CURL_LIBRARIES} pthread ${MQTT_LIBRARIES} ${LUA_LIBRARIES} ${CMAKE_DL_LIBS} ${TELLDUS_LIBRARIES})
+ 
