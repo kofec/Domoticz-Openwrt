@@ -77,14 +77,14 @@ start_service() {
 
 findLatestDatabase() {
 #where to search database
-database_folder="/root/"
+database_folder="/tmp/"
 # /proc/uptime
 # This file contains two numbers: the uptime of the system
 # (seconds), and the amount of time spent in idle process
 # (seconds).
 	Uptime="$(cat /proc/uptime)"
 	Uptime="${Uptime%%.*}"
-	if [ "$Uptime" -lt "300" ]; then
+	if [ "$Uptime" -lt "900" ]; then
 		destinationFolder=$1
 		yourfilenames="$(ls ${database_folder}domoticz*[0-9].db)"
 		local yourfilenames_res="$?"
@@ -109,7 +109,7 @@ database_folder="/root/"
 		  logger "There is NOT any domoticz file in ${database_folder} folder" -t Domoticz
 		fi
 	else
-		logger "Uptime over 300s - $Uptime" -t Domoticz
+		logger "Uptime over 900s - $Uptime" -t Domoticz
 	fi
 }
 
