@@ -76,6 +76,8 @@ start_service() {
 }
 
 findLatestDatabase() {
+#where to search database
+database_folder="/root/"
 # /proc/uptime
 # This file contains two numbers: the uptime of the system
 # (seconds), and the amount of time spent in idle process
@@ -84,8 +86,8 @@ findLatestDatabase() {
 	Uptime="${Uptime%%.*}"
 	if [ "$Uptime" -lt "300" ]; then
 		destinationFolder=$1
-		yourfilenames=`ls /root/domoticz*[0-9].db`
-		local yourfilenames_res=$?
+		yourfilenames="$(ls ${database_folder}domoticz*[0-9].db)"
+		local yourfilenames_res="$?"
 		if [ "$yourfilenames_res" -eq "0" ]; then
 			LatestDate=0
 			for eachfile in $yourfilenames
@@ -97,11 +99,14 @@ findLatestDatabase() {
 			done
 			if [ "$LatestDate" -gt "0" ]; then
 				if [ -d "$destinationFolder" ]; then
-					cp "/root/domoticz${LatestDate}.db" "${destinationFolder}domoticz.db"
+				  logger "Copy ${database_folder}domoticz${LatestDate}.db to ${destinationFolder}domoticz.db" -t Domoticz
+					cp "${database_folder}domoticz${LatestDate}.db" "${destinationFolder}domoticz.db"
 					chmod 0770 "$destinationFolder"
-					chown domoticz:domoticz "$destinationFolder"
+					chown -R domoticz:domoticz "$destinationFolder"
 				fi
 			fi
+		else
+		  logger "There is NOT any domoticz file in ${database_folder} folder" -t Domoticz
 		fi
 	else
 		logger "Uptime over 300s - $Uptime" -t Domoticz
