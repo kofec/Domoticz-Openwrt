@@ -100,6 +100,7 @@ database_folder="/tmp/"
 			if [ "$LatestDate" -gt "0" ]; then
 				if [ -d "$destinationFolder" ]; then
 				  logger "Copy ${database_folder}domoticz${LatestDate}.db to ${destinationFolder}domoticz.db" -t Domoticz
+                                        rm "${destinationFolder}domoticz.db*"
 					cp "${database_folder}domoticz${LatestDate}.db" "${destinationFolder}domoticz.db"
 					chmod 0770 "$destinationFolder"
 					chown -R domoticz:domoticz "$destinationFolder"
