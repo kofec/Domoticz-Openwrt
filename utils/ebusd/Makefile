@@ -6,8 +6,8 @@ PKG_RELEASE:=1
 
 PKG_SOURCE_URL:=https://github.com/john30/ebusd.git
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_DATE:=2021-12-19
-PKG_SOURCE_VERSION:=13221e2fd7a38a468916a98238b2e49d97687692
+PKG_SOURCE_DATE:=2022-11-14
+PKG_SOURCE_VERSION:=bc3e6110c7f6e12d9912e09d061c9dd5f335de39
 PKG_FIXUP:=autoreconf
 
 include $(INCLUDE_DIR)/package.mk
@@ -17,7 +17,7 @@ define Package/ebusd
   CATEGORY:=Network
   TITLE:=eBUS daemon
   URL:=https://github.com/john30/ebusd
-  DEPENDS:=+libpthread +librt +libstdcpp +libmosquittopp 
+  DEPENDS:=+libpthread +librt +libstdcpp +libmosquittopp +libopenssl
 endef
 
 define Package/ebusd/install
