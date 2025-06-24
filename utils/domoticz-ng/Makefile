@@ -8,9 +8,9 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=domoticz
-PKG_VERSION_MAJOR:=2022.2
-PKG_VERSION_PATCH:=14724
-PKG_COMMIT:=fbd00ad9b3f89a6444e901d80381e3e0d6066d96
+PKG_VERSION_MAJOR:=2024.7
+PKG_VERSION_PATCH:=16342
+PKG_COMMIT:=bc620cdb67be1562a0c5239e8c8df8a9b86d94bb
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
 PKG_RELEASE:=1
 
@@ -20,24 +20,25 @@ PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_VERSION)/$(PK
 PKG_HASH:=355057204437e295e3e3147623026481b500059ef24f59b59e3e8793237ac0b2
 else
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
-PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/$(PKG_SOURCE)
+# PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/$(PKG_SOURCE)
+PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
-PKG_HASH:=c74d4971f787b7ce782ce07877ac776712c02aadcae9709d0f5029dd2a8efc2a
+PKG_HASH:=9a5b4b2d74d4c55b251ccd2d8ac222a3d94ce89d9dc4f72f9e239ba67eb4b01e
 endif
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
 
-PKG_BUILD_DEPENDS:=minizip cereal DOMOTICZ-NG_PYTHON3:python3 
+PKG_BUILD_DEPENDS:=minizip cereal DOMOTICZ-NG_PYTHON3:python3
 PKG_BUILD_PARALLEL:=1
 PKG_FIXUP:=autoreconf
 PKG_USE_MIPS16:=0
 
 PKG_CONFIG_DEPENDS := \
-	CONFIG_PACKAGE_DOMOTICZ-NG \
-	CONFIG_DOMOTICZ-NG_PYTHON3 \
-	CONFIG_DOMOTICZ-NG_OPENZWAVE \
-	CONFIG_DOMOTICZ-NG_TELLDUS
+        CONFIG_PACKAGE_DOMOTICZ-NG \
+        CONFIG_DOMOTICZ-NG_PYTHON3 \
+        CONFIG_DOMOTICZ-NG_OPENZWAVE \
+        CONFIG_DOMOTICZ-NG_TELLDUS
 
 CMAKE_INSTALL:=1
 
@@ -53,27 +54,27 @@ define Package/domoticz-ng
   USERID:=domoticz=6144:domoticz=6144
   MENU:=1
   DEPENDS:= \
-	+boost \
-	+boost-date_time \
-	+boost-system \
-	+boost-thread \
-	+jsoncpp \
-	+libcurl \
-	+DOMOTICZ-NG_PYTHON3:python3 \
-	+DOMOTICZ-NG_OPENZWAVE:libopenzwave \
-	+DOMOTICZ-NG_TELLDUS:telldus-core  \
-	+minizip \
-	+lua5.3 \
-	+libfmt \
-	+libmosquitto \
-	+libopenssl \
-	+libsqlite3 \
-	+libstdcpp \
-	+zlib
+        +boost \
+        +boost-date_time \
+        +boost-system \
+        +boost-thread \
+        +jsoncpp \
+        +libcurl \
+        +DOMOTICZ-NG_PYTHON3:python3 \
+        +DOMOTICZ-NG_OPENZWAVE:libopenzwave \
+        +DOMOTICZ-NG_TELLDUS:telldus-core  \
+        +minizip \
+        +lua5.3 \
+        +libfmt \
+        +libmosquitto \
+        +libopenssl \
+        +libsqlite3 \
+        +libstdcpp \
+        +zlib
 endef
 
 define Package/domoticz-ng/config
-	source "$(SOURCE)/Config.in"
+        source "$(SOURCE)/Config.in"
 endef
 
 define Package/domoticz-ng/description
@@ -81,21 +82,21 @@ define Package/domoticz-ng/description
 endef
 
 CMAKE_OPTIONS += \
-	-DBUILD_SHARED_LIBS=yes \
-	-DBoost_NO_BOOST_CMAKE=yes \
-	-DGIT_SUBMODULE=no \
-	-DCMAKE_BUILD_TYPE=Release \
-	-DUSE_BUILTIN_MQTT=no \
-	-DUSE_BUILTIN_SQLITE=no \
-	-DUSE_BUILTIN_JSONCPP=no \
-	-DUSE_BUILTIN_MINIZIP=no \
-	-DUSE_BUILTIN_LIBFMT=no \
-	-DUSE_LUA_STATIC=no \
-	-DUSE_STATIC_BOOST=no \
-	-DUSE_STATIC_LIBSTDCXX=no \
-	-DUSE_STATIC_OPENZWAVE=no \
-	-DUSE_OPENSSL_STATIC=no \
-	-DWITH_LIBUSB=no
+        -DBUILD_SHARED_LIBS=yes \
+        -DBoost_NO_BOOST_CMAKE=yes \
+        -DGIT_SUBMODULE=no \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DUSE_BUILTIN_MQTT=no \
+        -DUSE_BUILTIN_SQLITE=no \
+        -DUSE_BUILTIN_JSONCPP=no \
+        -DUSE_BUILTIN_MINIZIP=no \
+        -DUSE_BUILTIN_LIBFMT=no \
+        -DUSE_LUA_STATIC=no \
+        -DUSE_STATIC_BOOST=no \
+        -DUSE_STATIC_LIBSTDCXX=no \
+        -DUSE_STATIC_OPENZWAVE=no \
+        -DUSE_OPENSSL_STATIC=no \
+        -DWITH_LIBUSB=no
 
 TARGET_CFLAGS += -flto
 TARGET_CXXFLAGS += -DWITH_GPIO -flto
@@ -119,58 +120,59 @@ CMAKE_OPTIONS += -DUSE_TELLDUS=no
 endif
 
 define Build/Prepare
-	$(call Build/Prepare/Default)
-	# Fix APPVERSION/APPDATE since we don't build from a git tree
-	sed -i 's|#define APPVERSION.[^\]*\\|#define APPVERSION $(PKG_VERSION_PATCH)\\|' \
-		 $(PKG_BUILD_DIR)/getgit.cmake
-	COMMITDATE=`tar tvfz $(DL_DIR)/$(PKG_SOURCE) --full-time | sed 's/.* \(20..-..-.. ..:..:..\) domoticz-.*/\1/;q'`; \
-	COMMITTS=`date --date="$$$${COMMITDATE}" +%s`; \
-	sed -i "s/#define APPDATE.*/#define APPDATE $$$${COMMITTS}\\\n\")/" $(PKG_BUILD_DIR)/getgit.cmake
+        $(call Build/Prepare/Default)
+        # Fix APPVERSION/APPDATE since we don't build from a git tree
+        sed -i 's|#define APPVERSION.[^\]*\\|#define APPVERSION $(PKG_VERSION_PATCH)\\|' \
+                 $(PKG_BUILD_DIR)/getgit.cmake
+        COMMITDATE=`tar tvfz $(DL_DIR)/$(PKG_SOURCE) --full-time | sed 's/.* \(20..-..-.. ..:..:..\) domoticz-.*/\1/;q'`; \
+        COMMITTS=`date --date="$$$${COMMITDATE}" +%s`; \
+        sed -i "s/#define APPDATE.*/#define APPDATE $$$${COMMITTS}\\\n\")/" $(PKG_BUILD_DIR)/getgit.cmake
 ifneq ($(PKG_COMMIT),)
-	sed -i "s/#define APPHASH.[^n]*n/#define APPHASH \"$(shell echo $(PKG_COMMIT) | cut -c1-8)\"\\\n/" $(PKG_BUILD_DIR)/getgit.cmake
-	sed -i "s/#define APPHASH /#define APPHASH \\\/" $(PKG_BUILD_DIR)/getgit.cmake
-	sed -i "s/$(shell echo $(PKG_COMMIT) | cut -c1-8)/$(shell echo $(PKG_COMMIT) | cut -c1-8)\\\/" $(PKG_BUILD_DIR)/getgit.cmake
+        sed -i "s/#define APPHASH.[^n]*n/#define APPHASH \"$(shell echo $(PKG_COMMIT) | cut -c1-8)\"\\\n/" $(PKG_BUILD_DIR)/getgit.cmake
+        sed -i "s/#define APPHASH /#define APPHASH \\\/" $(PKG_BUILD_DIR)/getgit.cmake
+        sed -i "s/$(shell echo $(PKG_COMMIT) | cut -c1-8)/$(shell echo $(PKG_COMMIT) | cut -c1-8)\\\/" $(PKG_BUILD_DIR)/getgit.cmake
 endif
 
-	# Remove unwanted scripts
-	cd $(PKG_BUILD_DIR)/scripts && rm -rf \
-		buienradar_rain_example.pl \
-		_domoticz_main* \
-		download_update.sh \
-		dzVents/{.gitignore,documentation,examples,generated_scripts,data} \
-		dzVents/runtime/{integration-tests,misc/smoothing.xlsx,tests} \
-		logrotate/ \
-		lua_parsers/example* \
-		lua/*demo.lua \
-		python/ \
-		readme.txt \
-		restart_domoticz \
-		templates/All.Python \
-		update_domoticz \
-		domoticz.conf
-	# Remove *.md
-	cd $(PKG_BUILD_DIR) && $(FIND) -name '*.md' -delete
+        # Remove unwanted scripts
+        cd $(PKG_BUILD_DIR)/scripts && rm -rf \
+                buienradar_rain_example.pl \
+                _domoticz_main* \
+                download_update.sh \
+                dzVents/{.gitignore,documentation,examples,generated_scripts,data} \
+                dzVents/runtime/{integration-tests,misc/smoothing.xlsx,tests} \
+                logrotate/ \
+                lua_parsers/example* \
+                lua/*demo.lua \
+                python/ \
+                readme.txt \
+                restart_domoticz \
+                templates/All.Python \
+                update_domoticz \
+                domoticz.conf
+        # Remove *.md
+        cd $(PKG_BUILD_DIR) && $(FIND) -name '*.md' -delete
 endef
 
 define Package/domoticz-ng/install
-	$(INSTALL_DIR) $(1)/etc/config $(1)/etc/hotplug.d/tty $(1)/etc/init.d $(1)/etc/domoticz/plugins
-	$(INSTALL_BIN) ./files/domoticz.hotplug $(1)/etc/hotplug.d/tty/domoticz
-	$(INSTALL_BIN) ./files/domoticz.init $(1)/etc/init.d/domoticz
-	$(INSTALL_CONF) ./files/domoticz.config $(1)/etc/config/domoticz
-	$(INSTALL_DIR) $(1)/usr/share/domoticz $(1)/usr/bin
-	$(CP) $(PKG_INSTALL_DIR)/usr/dzVents $(1)/usr/share/domoticz/dzVents
-	$(CP) $(PKG_INSTALL_DIR)/usr/Config $(1)/usr/share/domoticz/Config
-	$(CP) $(PKG_INSTALL_DIR)/usr/scripts $(1)/etc/domoticz/scripts
-	ln -sf /var/lib/domoticz/dzVents/generated_scripts $(1)/etc/domoticz/scripts/dzVents
-	ln -sf /var/lib/domoticz/dzVents/data $(1)/etc/domoticz/scripts/dzVents
-	$(CP) $(PKG_INSTALL_DIR)/usr/www $(1)/usr/share/domoticz/
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/domoticz $(1)/usr/bin/domoticz
-	# compress static web content
-	find $(1)/usr/share/domoticz/www -name "*.css" -exec gzip -9 {} \;
-	find $(1)/usr/share/domoticz/www -name "*.js" -exec gzip -9 {} \;
-	gzip -9 $(1)/usr/share/domoticz/www/*.html
-	gzip -9 $(1)/usr/share/domoticz/www/secpanel/*.html
-	find $(1)/usr/share/domoticz/www/views -name "*.html" -exec sh -c 'grep -q "<\!--#embed" {} || gzip -9 {}' \;
+        $(INSTALL_DIR) $(1)/etc/config $(1)/etc/hotplug.d/tty $(1)/etc/init.d $(1)/etc/domoticz/plugins
+        $(INSTALL_BIN) ./files/domoticz.hotplug $(1)/etc/hotplug.d/tty/domoticz
+        $(INSTALL_BIN) ./files/domoticz.init $(1)/etc/init.d/domoticz
+        $(INSTALL_CONF) ./files/domoticz.config $(1)/etc/config/domoticz
+        $(INSTALL_DIR) $(1)/usr/share/domoticz $(1)/usr/bin
+        $(CP) $(PKG_INSTALL_DIR)/usr/dzVents $(1)/usr/share/domoticz/dzVents
+        # Config for OZW
+        # $(CP) $(PKG_INSTALL_DIR)/usr/Config $(1)/usr/share/domoticz/Config
+        $(CP) $(PKG_INSTALL_DIR)/usr/scripts $(1)/etc/domoticz/scripts
+        ln -sf /var/lib/domoticz/dzVents/generated_scripts $(1)/etc/domoticz/scripts/dzVents
+        ln -sf /var/lib/domoticz/dzVents/data $(1)/etc/domoticz/scripts/dzVents
+        $(CP) $(PKG_INSTALL_DIR)/usr/www $(1)/usr/share/domoticz/
+        $(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/domoticz $(1)/usr/bin/domoticz
+        # compress static web content
+        find $(1)/usr/share/domoticz/www -name "*.css" -exec gzip -9 {} \;
+        find $(1)/usr/share/domoticz/www -name "*.js" -exec gzip -9 {} \;
+        gzip -9 $(1)/usr/share/domoticz/www/*.html
+        gzip -9 $(1)/usr/share/domoticz/www/secpanel/*.html
+        find $(1)/usr/share/domoticz/www/views -name "*.html" -exec sh -c 'grep -q "<\!--#embed" {} || gzip -9 {}' \;
 endef
 
 define Package/domoticz-ng/conffiles
