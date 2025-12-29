@@ -1,0 +1,14 @@
+/var/log/ebusd.log {
+	daily
+	rotate 7
+	missingok
+	notifempty
+	size 200k
+	compress
+	delaycompress
+	copytruncate
+}
+
+# Check https://openwrt.org/docs/guide-user/base-system/log.essentials
+# for more logrotate options and details.
+# test: logrotate -vf /etc/logrotate.conf

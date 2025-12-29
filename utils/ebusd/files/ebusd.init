@@ -1,0 +1,48 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+USE_PROCD=1
+PROG=/usr/bin/ebusd
+
+start_ebusd() {
+	local section="$1"
+	local device scanconfig httpport configlang loglevel configpath logfile
+
+	config_get device "$section" "device"
+	config_get_bool scanconfig "$section" "scanconfig" 0
+	config_get httpport "$section" "httpport"
+	config_get configlang "$section" "configlang"
+	config_get loglevel "$section" "loglevel"
+	config_get configpath "$section" "configpath"
+	config_get logfile "$section" "logfile"
+
+	[ -n "$device" ] && procd_append_param command -d "$device"
+	[ "$scanconfig" -gt 0 ] && procd_append_param command --scanconfig
+	[ -n "$httpport" ] && procd_append_param command --httpport "$httpport"
+	[ -n "$configlang" ] && procd_append_param command --configlang "$configlang"
+	[ -n "$loglevel" ] && procd_append_param command --loglevel "$loglevel"
+	[ -n "$configpath" ] && procd_append_param command --configpath "$configpath"
+	[ -n "$logfile" ] && {
+		# Ensure directory exists on tmpfs (/var/log)
+		mkdir -p "$(dirname "$logfile")"
+		procd_append_param command --logfile "$logfile"
+	}
+}
+
+start_service() {
+	local disabled
+
+	config_load "ebusd"
+	config_get_bool disabled "ebusd" "disabled" 0
+	[ "$disabled" -gt 0 ] && return 1
+
+	procd_open_instance
+	procd_set_param command "$PROG"
+	config_foreach start_ebusd ebusd
+
+	procd_set_param respawn
+	procd_set_param stdout 0
+	procd_set_param term_timeout 10
+	procd_set_param user "root"
+	procd_close_instance
+}
