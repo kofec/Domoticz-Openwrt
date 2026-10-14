@@ -22,4 +22,600 @@ config DOMOTICZ-NG_TELLDUS
            Enable Telldus.
            Enabled by default.
 		   
+
+menu "Hardware drivers"
+
+config DOMOTICZ-NG_HW_SELECT
+	bool "Build only selected hardware drivers"
+	default n
+	help
+	  Off: every hardware driver is built, as upstream does.
+	  On: only the drivers ticked below are compiled and linked
+	  (patch 030, cmake -DINCLUDE_HARDWARE_ALL=OFF). Always built:
+	  dummy, MQTT client, Domoticz remote server, Python plugins
+	  (DOMOTICZ-NG_PYTHON3) and OpenZWave (DOMOTICZ-NG_OPENZWAVE).
+	  Hardware of a type left out stays in the database but does not
+	  start. openwrt/domoticz_hw_moduly.py in MojeRepo lists what the
+	  running instances need.
+
+if DOMOTICZ-NG_HW_SELECT
+
+config DOMOTICZ-NG_HW_1WIRE
+	bool "1WIRE: 1-Wire (System)"
+	default n
+	help
+	  1-Wire (System)
+
+config DOMOTICZ-NG_HW_ACCUWEATHER
+	bool "ACCUWEATHER: AccuWeather (Weather Lookup)"
+	default n
+	help
+	  AccuWeather (Weather Lookup)
+
+config DOMOTICZ-NG_HW_AIRCONWITHME
+	bool "AIRCONWITHME: AirconWithMe Wifi Airco module"
+	default n
+	help
+	  AirconWithMe Wifi Airco module
+
+config DOMOTICZ-NG_HW_ALFENEVE
+	bool "ALFENEVE: Alfen Eve Charger LAN"
+	default n
+	help
+	  Alfen Eve Charger LAN
+
+config DOMOTICZ-NG_HW_ANNATHERMOSTAT
+	bool "ANNATHERMOSTAT: Plugwise Anna Thermostat via LAN interface"
+	default n
+	help
+	  Plugwise Anna Thermostat via LAN interface
+
+config DOMOTICZ-NG_HW_ARILUX
+	bool "ARILUX: Arilux AL-LC0x"
+	default n
+	help
+	  Arilux AL-LC0x
+
+config DOMOTICZ-NG_HW_ATAGONE
+	bool "ATAGONE: Atag One Thermostat"
+	default n
+	help
+	  Atag One Thermostat
+
+config DOMOTICZ-NG_HW_BLEBOX
+	bool "BLEBOX: BleBox devices"
+	default n
+	help
+	  BleBox devices
+
+config DOMOTICZ-NG_HW_BUIENRADAR
+	bool "BUIENRADAR: Buienradar (Dutch Weather Information)"
+	default n
+	help
+	  Buienradar (Dutch Weather Information)
+
+config DOMOTICZ-NG_HW_COMM5
+	bool "COMM5: Comm5 MA-5XXX with LAN interface (+2)"
+	default n
+	help
+	  Comm5 MA-5XXX with LAN interface
+	  Comm5 MA-4XXX/MI-XXXX Serial/USB interface
+	  Comm5 SM-XXXX with LAN interface
+
+config DOMOTICZ-NG_HW_CURRENTCOST
+	bool "CURRENTCOST: CurrentCost Meter USB (+1)"
+	default n
+	help
+	  CurrentCost Meter USB
+	  CurrentCost Meter with LAN interface
+
+config DOMOTICZ-NG_HW_DAIKIN
+	bool "DAIKIN: Daikin Airconditioning with LAN (HTTP) interface (+1)"
+	default n
+	help
+	  Daikin Airconditioning with LAN (HTTP) interface
+	  Daikin Altherma (Modbus TCP via Homehub)
+
+config DOMOTICZ-NG_HW_DARKSKY
+	bool "DARKSKY: DarkSky (Weather Lookup)"
+	default n
+	help
+	  DarkSky (Weather Lookup)
+
+config DOMOTICZ-NG_HW_DAVISVANTAGE
+	bool "DAVISVANTAGE: Davis Vantage Weather Station USB"
+	default n
+	help
+	  Davis Vantage Weather Station USB
+
+config DOMOTICZ-NG_HW_DENKOVI
+	bool "DENKOVI: Denkovi Modules with LAN (HTTP) Interface (+2)"
+	default n
+	help
+	  Denkovi Modules with LAN (HTTP) Interface
+	  Denkovi Modules with USB Interface
+	  Denkovi Modules with LAN (TCP) Interface
+
+config DOMOTICZ-NG_HW_EC3KMETER
+	bool "EC3KMETER: Energy Count 3000/ NETBSEM4/ La Crosse RT-10 LAN"
+	default n
+	help
+	  Energy Count 3000/ NETBSEM4/ La Crosse RT-10 LAN
+
+config DOMOTICZ-NG_HW_ECOCOMPTEUR
+	bool "ECOCOMPTEUR: EcoCompteur Legrand with LAN interface"
+	default n
+	help
+	  EcoCompteur Legrand with LAN interface
+
+config DOMOTICZ-NG_HW_ECODEVICES
+	bool "ECODEVICES: Eco Devices"
+	default n
+	help
+	  Eco Devices
+
+config DOMOTICZ-NG_HW_EHOUSE
+	bool "EHOUSE: eHouse UDP+TCP with LAN interface"
+	default n
+	help
+	  eHouse UDP+TCP with LAN interface
+
+config DOMOTICZ-NG_HW_ENEVER
+	bool "ENEVER: Enever Dutch Electricity/Gas Price Feed"
+	default n
+	help
+	  Enever Dutch Electricity/Gas Price Feed
+
+config DOMOTICZ-NG_HW_ENOCEAN
+	bool "ENOCEAN: EnOcean USB (ESP2) (+1)"
+	default n
+	help
+	  EnOcean USB (ESP2)
+	  EnOcean USB (ESP3)
+
+config DOMOTICZ-NG_HW_ENPHASE
+	bool "ENPHASE: Enphase Envoy with LAN (HTTP) interface"
+	default n
+	help
+	  Enphase Envoy with LAN (HTTP) interface
+
+config DOMOTICZ-NG_HW_ETH8020
+	bool "ETH8020: ETH8020 Relay board with LAN interface"
+	default n
+	help
+	  ETH8020 Relay board with LAN interface
+
+config DOMOTICZ-NG_HW_EVEHICLE
+	bool "EVEHICLE: Tesla Model S/3/X (+1)"
+	default n
+	help
+	  Tesla Model S/3/X
+	  Mercedes ME Connect
+
+config DOMOTICZ-NG_HW_EVOHOME
+	bool "EVOHOME: Evohome via script (+3)"
+	default n
+	help
+	  Evohome via script
+	  Evohome USB (for HGI/S80)
+	  Evohome via LAN (remote HGI/S80)
+	  Evohome via Web API
+
+config DOMOTICZ-NG_HW_FRITZBOX
+	bool "FRITZBOX: Fritzbox Call/Statistics monitor via LAN interface"
+	default n
+	help
+	  Fritzbox Call/Statistics monitor via LAN interface
+
+config DOMOTICZ-NG_HW_GPIO
+	bool "GPIO: Raspberry's GPIO port (+1)"
+	default n
+	help
+	  Raspberry's GPIO port
+	  Generic sysfs GPIO
+
+config DOMOTICZ-NG_HW_HARMONYHUB
+	bool "HARMONYHUB: Logitech Harmony Hub"
+	default n
+	help
+	  Logitech Harmony Hub
+
+config DOMOTICZ-NG_HW_HEOS
+	bool "HEOS: HEOS by DENON"
+	default n
+	help
+	  HEOS by DENON
+
+config DOMOTICZ-NG_HW_HONEYWELL
+	bool "HONEYWELL: Honeywell Thermostat"
+	default n
+	help
+	  Honeywell Thermostat
+
+config DOMOTICZ-NG_HW_HTTPPOLLER
+	bool "HTTPPOLLER: HTTP/HTTPS poller"
+	default n
+	help
+	  HTTP/HTTPS poller
+
+config DOMOTICZ-NG_HW_I2C
+	bool "I2C: I2C sensor BMP085/180 Temp+Baro (+5)"
+	default n
+	help
+	  I2C sensor BMP085/180 Temp+Baro
+	  I2C sensor HTU21D(F)/SI702x Temp+Humidity
+	  I2C sensor TSL2561 Illuminance
+	  I2C sensor PIO 8bit expander PCF8574(A)
+	  I2C sensor BME280 Temp+Hum+Baro
+	  I2C sensor GPIO 16bit expander MCP23017
+
+config DOMOTICZ-NG_HW_ICYTHERMOSTAT
+	bool "ICYTHERMOSTAT: ICY Thermostat"
+	default n
+	help
+	  ICY Thermostat
+
+config DOMOTICZ-NG_HW_INCOMFORT
+	bool "INCOMFORT: Intergas InComfort LAN2RF Gateway"
+	default n
+	help
+	  Intergas InComfort LAN2RF Gateway
+
+config DOMOTICZ-NG_HW_KMTRONIC
+	bool "KMTRONIC: KMTronic Gateway USB (+3)"
+	default n
+	help
+	  KMTronic Gateway USB
+	  KMTronic Gateway with LAN interface
+	  KMTronic 433MHz Gateway USB
+	  KMTronic Gateway with LAN/UDP interface
+
+config DOMOTICZ-NG_HW_KODI
+	bool "KODI: Kodi Media Server"
+	default n
+	help
+	  Kodi Media Server
+
+config DOMOTICZ-NG_HW_LIMITLESS
+	bool "LIMITLESS: Limitless/AppLamp/Mi Light with LAN/WiFi interface"
+	default n
+	help
+	  Limitless/AppLamp/Mi Light with LAN/WiFi interface
+
+config DOMOTICZ-NG_HW_LOGITECHMEDIASERVER
+	bool "LOGITECHMEDIASERVER: Logitech Media Server"
+	default n
+	help
+	  Logitech Media Server
+
+config DOMOTICZ-NG_HW_MATTER
+	bool "MATTER: Matter (python-matterjs-server)"
+	default n
+	help
+	  Matter (python-matterjs-server)
+
+config DOMOTICZ-NG_HW_METEOROLOGISK
+	bool "METEOROLOGISK: Meteorologisk institutt Norway (Weather Lookup)"
+	default n
+	help
+	  Meteorologisk institutt Norway (Weather Lookup)
+
+config DOMOTICZ-NG_HW_METEOSTICK
+	bool "METEOSTICK: Meteostick USB"
+	default n
+	help
+	  Meteostick USB
+
+config DOMOTICZ-NG_HW_MITSUBISHIWF
+	bool "MITSUBISHIWF: Mitsubishi WF RAC Airco with LAN (HTTP) interface"
+	default n
+	help
+	  Mitsubishi WF RAC Airco with LAN (HTTP) interface
+
+config DOMOTICZ-NG_HW_MOCHAD
+	bool "MOCHAD: Mochad CM15Pro/CM19A bridge with LAN interface"
+	default n
+	help
+	  Mochad CM15Pro/CM19A bridge with LAN interface
+
+config DOMOTICZ-NG_HW_MQTTAUTODISCOVERY
+	bool "MQTTAUTODISCOVERY: MQTT Auto Discovery Client Gateway with LAN interface"
+	default n
+	help
+	  MQTT Auto Discovery Client Gateway with LAN interface
+
+config DOMOTICZ-NG_HW_MULTIFUN
+	bool "MULTIFUN: MultiFun LAN"
+	default n
+	help
+	  MultiFun LAN
+
+config DOMOTICZ-NG_HW_MYSENSORS
+	bool "MYSENSORS: MySensors Gateway USB (+2)"
+	default n
+	help
+	  MySensors Gateway USB
+	  MySensors Gateway with LAN interface
+	  MySensors Gateway with MQTT interface
+
+config DOMOTICZ-NG_HW_NEFITEASY
+	bool "NEFITEASY: Nefit Easy HTTP server over LAN interface"
+	default n
+	help
+	  Nefit Easy HTTP server over LAN interface
+
+config DOMOTICZ-NG_HW_NEST
+	bool "NEST: Nest Thermostat/Protect (+1)"
+	default n
+	help
+	  Nest Thermostat/Protect
+	  Nest Thermostat/Protect OAuth
+
+config DOMOTICZ-NG_HW_NETATMO
+	bool "NETATMO: Netatmo"
+	default n
+	help
+	  Netatmo
+
+config DOMOTICZ-NG_HW_OCTOPRINT
+	bool "OCTOPRINT: OctoPrint (MQTT/Gina Haussge) with LAN interface"
+	default n
+	help
+	  OctoPrint (MQTT/Gina Haussge) with LAN interface
+
+config DOMOTICZ-NG_HW_ONKYOAV
+	bool "ONKYOAV: Onkyo AV Receiver (LAN)"
+	default n
+	help
+	  Onkyo AV Receiver (LAN)
+
+config DOMOTICZ-NG_HW_OPENMETEO
+	bool "OPENMETEO: Open-Meteo (Weather Lookup)"
+	default n
+	help
+	  Open-Meteo (Weather Lookup)
+
+config DOMOTICZ-NG_HW_OPENWEATHERMAP
+	bool "OPENWEATHERMAP: Open Weather Map"
+	default n
+	help
+	  Open Weather Map
+
+config DOMOTICZ-NG_HW_OPENWEBNET
+	bool "OPENWEBNET: MyHome OpenWebNet with LAN interface (+1)"
+	default n
+	help
+	  MyHome OpenWebNet with LAN interface
+	  MyHome OpenWebNet USB
+
+config DOMOTICZ-NG_HW_OTGW
+	bool "OTGW: OpenTherm Gateway USB (+1)"
+	default n
+	help
+	  OpenTherm Gateway USB
+	  OpenTherm Gateway with LAN interface
+
+config DOMOTICZ-NG_HW_P1METER
+	bool "P1METER: P1 Smart Meter USB (+1)"
+	default n
+	help
+	  P1 Smart Meter USB
+	  P1 Smart Meter with LAN interface
+
+config DOMOTICZ-NG_HW_PANASONICTV
+	bool "PANASONICTV: PanasonicTV"
+	default n
+	help
+	  PanasonicTV
+
+config DOMOTICZ-NG_HW_PHILIPSHUE
+	bool "PHILIPSHUE: Philips Hue Bridge"
+	default n
+	help
+	  Philips Hue Bridge
+
+config DOMOTICZ-NG_HW_PIFACE
+	bool "PIFACE: PiFace - Raspberry Pi IO expansion board"
+	default n
+	help
+	  PiFace - Raspberry Pi IO expansion board
+
+config DOMOTICZ-NG_HW_PINGER
+	bool "PINGER: System Alive Checker (Ping)"
+	default n
+	help
+	  System Alive Checker (Ping)
+
+config DOMOTICZ-NG_HW_PVOUTPUT
+	bool "PVOUTPUT: PVOutput (Input)"
+	default n
+	help
+	  PVOutput (Input)
+
+config DOMOTICZ-NG_HW_RAVEN
+	bool "RAVEN: Rainforest RAVEn USB"
+	default n
+	help
+	  Rainforest RAVEn USB
+
+config DOMOTICZ-NG_HW_REGO6XX
+	bool "REGO6XX: Rego 6XX USB/serial interface"
+	default n
+	help
+	  Rego 6XX USB/serial interface
+
+config DOMOTICZ-NG_HW_RELAYNET
+	bool "RELAYNET: Relay-Net 8 channel LAN Relay and binary Input module"
+	default n
+	help
+	  Relay-Net 8 channel LAN Relay and binary Input module
+
+config DOMOTICZ-NG_HW_RFLINK
+	bool "RFLINK: RFLink Gateway USB (+2)"
+	default n
+	help
+	  RFLink Gateway USB
+	  RFLink Gateway with LAN interface
+	  RFLink Gateway MQTT
+
+config DOMOTICZ-NG_HW_RFXCOM
+	bool "RFXCOM: RFXCOM - RFXtrx315 USB 315MHz Transceiver (+3)"
+	default n
+	help
+	  RFXCOM - RFXtrx315 USB 315MHz Transceiver
+	  RFXCOM - RFXtrx433 USB 433.92MHz Transceiver
+	  RFXCOM - RFXtrx868 USB 868MHz Transceiver
+	  RFXCOM - RFXtrx shared over LAN interface
+
+config DOMOTICZ-NG_HW_RTL433
+	bool "RTL433: Rtl433 RTL-SDR receiver"
+	default n
+	help
+	  Rtl433 RTL-SDR receiver
+
+config DOMOTICZ-NG_HW_S0METER
+	bool "S0METER: S0 Meter USB (+1)"
+	default n
+	help
+	  S0 Meter USB
+	  S0 Meter with LAN interface
+
+config DOMOTICZ-NG_HW_SATELINTEGRA
+	bool "SATELINTEGRA: Satel Integra via LAN interface"
+	default n
+	help
+	  Satel Integra via LAN interface
+
+config DOMOTICZ-NG_HW_SBFSPOT
+	bool "SBFSPOT: SBFSpot (SMA)"
+	default n
+	help
+	  SBFSpot (SMA)
+
+config DOMOTICZ-NG_HW_SOLAREDGE
+	bool "SOLAREDGE: SolarEdge via Web API"
+	default n
+	help
+	  SolarEdge via Web API
+
+config DOMOTICZ-NG_HW_SOLARMAX
+	bool "SOLARMAX: SolarMax via LAN interface"
+	default n
+	help
+	  SolarMax via LAN interface
+
+config DOMOTICZ-NG_HW_STERBOX
+	bool "STERBOX: Sterbox v2-3 PLC with LAN interface"
+	default n
+	help
+	  Sterbox v2-3 PLC with LAN interface
+
+config DOMOTICZ-NG_HW_SYSTEM
+	bool "SYSTEM: Motherboard sensors"
+	default n
+	help
+	  Motherboard sensors
+
+config DOMOTICZ-NG_HW_TADO
+	bool "TADO: Tado Thermostat"
+	default n
+	help
+	  Tado Thermostat
+
+config DOMOTICZ-NG_HW_TE923
+	bool "TE923: TE923 USB Compatible Weather Station"
+	default n
+	help
+	  TE923 USB Compatible Weather Station
+
+config DOMOTICZ-NG_HW_TELEINFO
+	bool "TELEINFO: Teleinfo EDF (+1)"
+	default n
+	help
+	  Teleinfo EDF
+	  Teleinfo EDF with LAN interface
+
+config DOMOTICZ-NG_HW_TELLSTICK
+	bool "TELLSTICK: Tellstick"
+	default n
+	help
+	  Tellstick
+
+config DOMOTICZ-NG_HW_TOONTHERMOSTAT
+	bool "TOONTHERMOSTAT: Toon Thermostat"
+	default n
+	help
+	  Toon Thermostat
+
+config DOMOTICZ-NG_HW_TTNMQTT
+	bool "TTNMQTT: The Things Network (MQTT/CayenneLPP) with LAN interface"
+	default n
+	help
+	  The Things Network (MQTT/CayenneLPP) with LAN interface
+
+config DOMOTICZ-NG_HW_USBTIN
+	bool "USBTIN: USBtin Can Gateway"
+	default n
+	help
+	  USBtin Can Gateway
+
+config DOMOTICZ-NG_HW_VISUALCROSSING
+	bool "VISUALCROSSING: Visual Crossing (Weather Lookup)"
+	default n
+	help
+	  Visual Crossing (Weather Lookup)
+
+config DOMOTICZ-NG_HW_VOLCRAFTCO20
+	bool "VOLCRAFTCO20: Volcraft CO-20 USB air quality sensor"
+	default n
+	help
+	  Volcraft CO-20 USB air quality sensor
+
+config DOMOTICZ-NG_HW_WINDDELEN
+	bool "WINDDELEN: Winddelen"
+	default n
+	help
+	  Winddelen
+
+config DOMOTICZ-NG_HW_WOL
+	bool "WOL: Wake-on-LAN"
+	default n
+	help
+	  Wake-on-LAN
+
+config DOMOTICZ-NG_HW_WUNDERGROUND
+	bool "WUNDERGROUND: Weather Underground"
+	default n
+	help
+	  Weather Underground
+
+config DOMOTICZ-NG_HW_XIAOMIGATEWAY
+	bool "XIAOMIGATEWAY: Xiaomi Gateway"
+	default n
+	help
+	  Xiaomi Gateway
+
+config DOMOTICZ-NG_HW_YEELIGHT
+	bool "YEELIGHT: YeeLight LED"
+	default n
+	help
+	  YeeLight LED
+
+config DOMOTICZ-NG_HW_YOULESS
+	bool "YOULESS: YouLess Meter with LAN interface"
+	default n
+	help
+	  YouLess Meter with LAN interface
+
+config DOMOTICZ-NG_HW_ZIBLUE
+	bool "ZIBLUE: ZiBlue RFPlayer USB (+1)"
+	default n
+	help
+	  ZiBlue RFPlayer USB
+	  ZiBlue RFPlayer with LAN interface
+
+endif
+
+endmenu
+
 endmenu

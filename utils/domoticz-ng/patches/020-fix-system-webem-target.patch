@@ -1,0 +1,19 @@
+Index: domoticz-c9625612cb51d9448b4a8b2862e5f99503bbb658/CMakeLists.txt
+===================================================================
+--- domoticz-c9625612cb51d9448b4a8b2862e5f99503bbb658.orig/CMakeLists.txt
++++ domoticz-c9625612cb51d9448b4a8b2862e5f99503bbb658/CMakeLists.txt
+@@ -892,9 +892,11 @@ install(TARGETS domoticz DESTINATION ${C
+ # so the versioned .so (and its symlinks) must be installed alongside the
+ # executable. For a static webem (the default) it is baked into the binary and
+ # there is nothing to install.
+-get_target_property(_webem_type webem TYPE)
+-IF(_webem_type STREQUAL "SHARED_LIBRARY")
+-  install(TARGETS webem LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX})
++IF(TARGET webem)
++  get_target_property(_webem_type webem TYPE)
++  IF(_webem_type STREQUAL "SHARED_LIBRARY")
++    install(TARGETS webem LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX})
++  ENDIF()
+ ENDIF()
+ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/www DESTINATION ${CMAKE_INSTALL_PREFIX})
+ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/License.txt DESTINATION ${CMAKE_INSTALL_PREFIX})
