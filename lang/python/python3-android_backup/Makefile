@@ -11,12 +11,15 @@ PKG_NAME:=python3-android_backup
 PKG_VERSION:=0.2.0
 PKG_RELEASE:=1
 
+PYPI_NAME:=android_backup
+
 PKG_SOURCE:=android_backup-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://pypi.io/packages/source/a/android_backup
 PKG_HASH:=864b6a9f8e2dda7a3af3726df7439052d35781c5f7d50dd771d709293d158b97
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/android_backup-$(PKG_VERSION)
 
+include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
 include ../python3-package.mk
 

@@ -11,12 +11,15 @@ PKG_NAME:=python3-construct
 PKG_VERSION:=2.10.56
 PKG_RELEASE:=1
 
+PYPI_NAME:=construct
+
 PKG_SOURCE:=construct-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://pypi.io/packages/source/c/construct
 PKG_HASH:=97ba13edcd98546f10f7555af41c8ce7ae9d8221525ec4062c03f9adbf940661
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/construct-$(PKG_VERSION)
 
+include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
 include ../python3-package.mk
 
