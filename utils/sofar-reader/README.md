@@ -14,6 +14,7 @@ libcurl and OpenSSL installed and loaded, so it adds no flash (see
 | | Python 3 + gw2pvo | sofar-reader |
 |---|---|---|
 | RSS (x86_64 glibc, measured) | 12 MB stdlib only, 28.6 MB with `requests` | 2.2 MB (mostly shared libc pages) |
+| Netgear R6220, 24.10, 15 min with PVOutput (measured) | 4 MB private RSS + 5.2 MB in swap, peak 15.7 MB (urllib monitor) | 0.8 MB private, 5 MB shared libraries, peak 6.2 MB |
 | Flash | python3 + modules, several MB | 10 KB .ipk, 15 KB of code (mipsel_24kc, OpenWrt 24.10; the 64 KB file is mostly segment alignment) |
 
 ## Build
