@@ -43,7 +43,7 @@ config inverter 'ludynia'
 	option host '192.168.1.50'
 	option port '8899'
 	option serial '1712345678'
-	option interval '60'
+	option interval '300'
 	option read_strings '0'
 	option zero_offline '1'
 	option idx_energy '10'
@@ -56,7 +56,7 @@ config inverter 'ludynia'
 | `host`, `port` | -, 8899 | data logger address |
 | `serial` | - | **logger** S/N (decimal, on the logger sticker) |
 | `slave` | 1 | Modbus address of the inverter |
-| `interval` | 60 | seconds between reads (min. 10) |
+| `interval` | 300 | seconds between reads (min. 10); each read is also the PVOutput upload |
 | `timeout` | 10 | connect/receive timeout in seconds |
 | `read_strings` | 0 | also read 0x0105-0x0114 (string 1-8 V/A) |
 | `zero_offline` | 1 | send 0 W when the logger disappears (it is powered by the inverter, so it is off at night) |

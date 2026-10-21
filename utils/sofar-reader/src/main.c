@@ -138,7 +138,7 @@ static int load_config(const char *confdir, const char *section,
 	inv->port = opt_num(ctx, s, "port", 8899);
 	inv->serial = strtoul(opt_str(ctx, s, "serial", "0"), NULL, 10);
 	inv->slave = opt_num(ctx, s, "slave", 1);
-	inv->interval = opt_num(ctx, s, "interval", 60);
+	inv->interval = opt_num(ctx, s, "interval", 300);
 	inv->timeout = opt_num(ctx, s, "timeout", 10);
 	inv->read_strings = opt_num(ctx, s, "read_strings", 0);
 	inv->zero_offline = opt_num(ctx, s, "zero_offline", 1);
