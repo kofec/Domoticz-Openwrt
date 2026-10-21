@@ -12,7 +12,7 @@ left to Domoticz (see [PVOutput](#pvoutput)).
 | | Python 3 + gw2pvo | sofar-reader |
 |---|---|---|
 | RSS (x86_64 glibc, measured) | 12 MB stdlib only, 28.6 MB with `requests` | 2.2 MB (mostly shared libc pages) |
-| Flash | python3 + modules, several MB | tens of KB (39 KB unstripped on x86_64) |
+| Flash | python3 + modules, several MB | 10 KB .ipk, 15 KB of code (mipsel_24kc, OpenWrt 24.10; the 64 KB file is mostly segment alignment) |
 
 ## Build
 
