@@ -62,21 +62,20 @@ static void urlencode(char *dst, size_t len, const char *src)
 	dst[o] = 0;
 }
 
-int domoticz_udevice(const struct domoticz *dz, int idx, int nvalue,
-		     const char *svalue)
+/* GET /json.htm?<query>, "what" names the request in the log */
+static int request(const struct domoticz *dz, const char *query, const char *what)
 {
-	char req[1024], val[512], resp[1024];
+	char req[1280], resp[1024];
 	size_t got = 0;
 	ssize_t n;
 	int fd, len;
 
-	urlencode(val, sizeof(val), svalue);
 	len = snprintf(req, sizeof(req),
-		       "GET /json.htm?type=command&param=udevice&idx=%d&nvalue=%d&svalue=%s HTTP/1.0\r\n"
+		       "GET /json.htm?%s HTTP/1.0\r\n"
 		       "Host: %s:%d\r\n"
 		       "%s%s%s"
 		       "Connection: close\r\n\r\n",
-		       idx, nvalue, val, dz->host, dz->port,
+		       query, dz->host, dz->port,
 		       *dz->auth ? "Authorization: Basic " : "", dz->auth,
 		       *dz->auth ? "\r\n" : "");
 	if (len < 0 || (size_t)len >= sizeof(req))
@@ -103,14 +102,45 @@ int domoticz_udevice(const struct domoticz *dz, int idx, int nvalue,
 	resp[got] = 0;
 
 	if (strncmp(resp, "HTTP/1.", 7) || strncmp(resp + 8, " 200", 4)) {
-		syslog(LOG_WARNING, "domoticz idx %d: %.40s", idx,
+		syslog(LOG_WARNING, "domoticz %s: %.40s", what,
 		       got ? resp : "no response");
 		return -1;
 	}
 	if (!strstr(resp, "\"OK\"")) {
-		syslog(LOG_WARNING, "domoticz idx %d: update rejected (wrong idx?)", idx);
+		syslog(LOG_WARNING, "domoticz %s: rejected", what);
 		return -1;
 	}
+	return 0;
+}
+
+int domoticz_udevice(const struct domoticz *dz, int idx, int nvalue,
+		     const char *svalue)
+{
+	char query[640], val[512], what[24];
+
+	urlencode(val, sizeof(val), svalue);
+	snprintf(query, sizeof(query),
+		 "type=command&param=udevice&idx=%d&nvalue=%d&svalue=%s",
+		 idx, nvalue, val);
+	snprintf(what, sizeof(what), "idx %d", idx);
+	if (request(dz, query, what))
+		return -1;
 	syslog(LOG_DEBUG, "domoticz idx %d <- %s", idx, svalue);
+	return 0;
+}
+
+int domoticz_notify(const struct domoticz *dz, const char *subject,
+		    const char *body)
+{
+	char query[1024], subj[256], text[512];
+
+	urlencode(subj, sizeof(subj), subject);
+	urlencode(text, sizeof(text), body);
+	snprintf(query, sizeof(query),
+		 "type=command&param=sendnotification&subject=%s&body=%s",
+		 subj, text);
+	if (request(dz, query, "notification"))
+		return -1;
+	syslog(LOG_INFO, "notification sent: %s - %s", subject, body);
 	return 0;
 }

@@ -30,6 +30,10 @@ struct inverter {
 	int timeout;
 	int read_strings;
 	int zero_offline;
+	int zero_delay;		/* seconds without data before 0 W is sent */
+	int notify_after;	/* seconds without data before a notification */
+	char notify_subject[64];
+	char notify_text[128];
 	int idx[64];		/* per sofar_items[], 0 = not sent */
 	int idx_energy;		/* Electric (Instant+Counter): W;Wh */
 	int idx_status;		/* Text: status and active faults */
@@ -138,6 +142,12 @@ static int load_config(const char *confdir, const char *section,
 	inv->timeout = opt_num(ctx, s, "timeout", 10);
 	inv->read_strings = opt_num(ctx, s, "read_strings", 0);
 	inv->zero_offline = opt_num(ctx, s, "zero_offline", 1);
+	inv->zero_delay = opt_num(ctx, s, "zero_delay", 900);
+	inv->notify_after = opt_num(ctx, s, "notify_after", 86400);
+	snprintf(inv->notify_subject, sizeof(inv->notify_subject), "%s",
+		 opt_str(ctx, s, "notify_subject", "sofar-reader"));
+	snprintf(inv->notify_text, sizeof(inv->notify_text), "%s",
+		 opt_str(ctx, s, "notify_text", "No data from the inverter for"));
 	inv->idx_energy = opt_num(ctx, s, "idx_energy", 0);
 	inv->idx_status = opt_num(ctx, s, "idx_status", 0);
 	for (size_t i = 0; i < sofar_nitems; i++) {
@@ -311,8 +321,9 @@ int main(int argc, char **argv)
 	struct sofar_data d;
 	struct timespec t0, t1;
 	int once = 0, dry = 0, verbose = 0, online = -1;
-	long last_total = -1, last_pvo = -1;
-	int c, rc, ok;
+	long last_total = -1, last_pvo = -1, last_ok, last_alarm;
+	int c, rc, ok, zeroed = 0;
+	char text[192];
 
 	while ((c = getopt(argc, argv, "s:1nvC:h")) != -1) {
 		switch (c) {
@@ -344,6 +355,10 @@ int main(int argc, char **argv)
 		syslog(LOG_INFO, "%s: PVOutput system %s every %d s", inv.name,
 		       pvo.system_id, pvo.interval);
 
+	/* Silence is counted from start, like a failed read at start */
+	clock_gettime(CLOCK_MONOTONIC, &t0);
+	last_ok = last_alarm = t0.tv_sec;
+
 	while (!stop) {
 		clock_gettime(CLOCK_MONOTONIC, &t0);
 
@@ -352,6 +367,8 @@ int main(int argc, char **argv)
 			if (online != 1)
 				syslog(LOG_INFO, "%s: inverter online", inv.name);
 			online = 1;
+			last_ok = last_alarm = t0.tv_sec;
+			zeroed = 0;
 			last_total = get(&d, "total_energy", &ok);
 			if (dry)
 				print_json(&d);
@@ -369,9 +386,21 @@ int main(int argc, char **argv)
 				       solarman_strerror(rc));
 			else
 				syslog(LOG_DEBUG, "%s: %s", inv.name, solarman_strerror(rc));
-			if (online == 1 && inv.zero_offline && !dry)
-				push_offline(&inv, &dz, last_total);
 			online = 0;
+			/* A weak logger link drops single reads, wait before 0 W */
+			if (inv.zero_offline && !zeroed && !dry &&
+			    t0.tv_sec - last_ok >= inv.zero_delay) {
+				push_offline(&inv, &dz, last_total);
+				zeroed = 1;
+			}
+			/* Repeated every notify_after while the silence lasts */
+			if (inv.notify_after > 0 && !dry &&
+			    t0.tv_sec - last_alarm >= inv.notify_after) {
+				snprintf(text, sizeof(text), "%s %ld h", inv.notify_text,
+					 (long)(t0.tv_sec - last_ok) / 3600);
+				domoticz_notify(&dz, inv.notify_subject, text);
+				last_alarm = t0.tv_sec;
+			}
 		}
 
 		if (once)

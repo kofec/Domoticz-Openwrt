@@ -60,6 +60,9 @@ config inverter 'ludynia'
 | `timeout` | 10 | connect/receive timeout in seconds |
 | `read_strings` | 0 | also read 0x0105-0x0114 (string 1-8 V/A) |
 | `zero_offline` | 1 | send 0 W when the logger disappears (it is powered by the inverter, so it is off at night) |
+| `zero_delay` | 900 | seconds without data before the 0 W; a logger with weak Wi-Fi drops single reads |
+| `notify_after` | 86400 | Domoticz notification after this many seconds without data, repeated while it lasts; 0 = off |
+| `notify_subject`, `notify_text` | `sofar-reader`, `No data from the inverter for` | notification subject and text, the text gets `<hours> h` appended |
 | `idx_energy` | - | Domoticz *Electric (Instant+Counter)*, gets `output_power;total_energy*1000` (W;Wh) |
 | `idx_status` | - | Domoticz *Text*, gets `Normal` or `FAULT: ID01 ...`; sent only when it changes |
 | `idx_<name>` | - | any numeric value listed by `sofar-reader -n`, e.g. `idx_pv1_power`, `idx_l1_voltage`, `idx_module_temp` |

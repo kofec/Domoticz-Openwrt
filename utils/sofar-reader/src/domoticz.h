@@ -14,4 +14,8 @@ void domoticz_set_auth(struct domoticz *dz, const char *user, const char *pass);
 int domoticz_udevice(const struct domoticz *dz, int idx, int nvalue,
 		     const char *svalue);
 
+/* /json.htm?type=command&param=sendnotification&subject=..&body=.. */
+int domoticz_notify(const struct domoticz *dz, const char *subject,
+		    const char *body);
+
 #endif
