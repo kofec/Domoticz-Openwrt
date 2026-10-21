@@ -73,7 +73,7 @@ int solarman_connect(const char *host, int port, int timeout_s)
 	struct addrinfo hints = { .ai_family = AF_UNSPEC, .ai_socktype = SOCK_STREAM };
 	struct addrinfo *res, *ai;
 	struct timeval tv = { .tv_sec = timeout_s };
-	char service[8];
+	char service[12];	/* any int from UCI, not just 1-65535 */
 	int fd = -1;
 
 	snprintf(service, sizeof(service), "%d", port);
