@@ -13,14 +13,15 @@ define Package/sofar-reader
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=Sofar inverter reader (Solarman LSW-3 logger) for Domoticz
-  DEPENDS:=+libuci
+  DEPENDS:=+libuci +libcurl
 endef
 
 define Package/sofar-reader/description
   Reads Sofar K-TLX inverter registers through a Solarman LSW-3/LSE
   data logger (protocol V5, TCP 8899) and pushes the values to Domoticz
-  over its HTTP JSON API. One small C daemon per inverter, configured
-  in /etc/config/sofar-reader. Replaces the Python Sofar_LSW3 scripts.
+  over its HTTP JSON API, optionally also to PVOutput. One small C daemon
+  per inverter, configured in /etc/config/sofar-reader. Replaces the
+  Python Sofar_LSW3 scripts.
 endef
 
 define Package/sofar-reader/conffiles

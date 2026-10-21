@@ -16,6 +16,7 @@
 #include <uci.h>
 
 #include "domoticz.h"
+#include "pvoutput.h"
 #include "sofar.h"
 #include "solarman.h"
 
@@ -74,8 +75,32 @@ static struct uci_section *find_section(struct uci_package *pkg,
 	return NULL;
 }
 
+static void load_pvoutput(struct uci_context *ctx, struct uci_section *s,
+			  const char *name, struct pvoutput *pvo)
+{
+	const char *file = opt_str(ctx, s, "pvo_api_key_file", NULL);
+
+	snprintf(pvo->system_id, sizeof(pvo->system_id), "%s",
+		 opt_str(ctx, s, "pvo_system_id", ""));
+	snprintf(pvo->api_key, sizeof(pvo->api_key), "%s",
+		 opt_str(ctx, s, "pvo_api_key", ""));
+	pvo->interval = opt_num(ctx, s, "pvo_interval", 300);
+	pvo->timeout = 20;
+
+	if (!*pvo->system_id) {
+		pvo->api_key[0] = 0;
+		return;
+	}
+	if (!*pvo->api_key && file &&
+	    pvoutput_key_from_file(pvo, file, opt_str(ctx, s, "pvo_api_key_name", NULL)))
+		syslog(LOG_WARNING, "%s: no PVOutput API key in %s", name, file);
+	if (!*pvo->api_key)
+		syslog(LOG_WARNING, "%s: PVOutput upload disabled, no API key", name);
+}
+
 static int load_config(const char *confdir, const char *section,
-		       struct inverter *inv, struct domoticz *dz)
+		       struct inverter *inv, struct domoticz *dz,
+		       struct pvoutput *pvo)
 {
 	struct uci_context *ctx = uci_alloc_context();
 	struct uci_package *pkg = NULL;
@@ -119,6 +144,7 @@ static int load_config(const char *confdir, const char *section,
 		snprintf(opt, sizeof(opt), "idx_%s", sofar_items[i].key);
 		inv->idx[i] = opt_num(ctx, s, opt, 0);
 	}
+	load_pvoutput(ctx, s, inv->name, pvo);
 
 	if (!*inv->host || !inv->serial) {
 		fprintf(stderr, "%s: host and serial (logger S/N) are required\n", inv->name);
@@ -226,6 +252,27 @@ static void push(const struct inverter *inv, const struct domoticz *dz,
 	}
 }
 
+/* Same values gw2pvo sent: v2 power, v1 energy today, v6 L1 voltage */
+static void upload(const struct pvoutput *pvo, const struct sofar_data *d, int dry)
+{
+	const struct sofar_item *it = sofar_find("l1_voltage");
+	char volt[24];
+	long power, today, v;
+	int dec, ok;
+
+	power = get(d, "output_power", &ok);
+	if (!ok)
+		return;
+	today = get(d, "today_energy", &ok);
+	if (!ok)
+		today = -1;
+	if (it && !sofar_value(d, it, &v, &dec))
+		sofar_format(volt, sizeof(volt), v, dec);
+	else
+		it = NULL;
+	pvoutput_add_status(pvo, time(NULL), power, today, it ? volt : NULL, dry);
+}
+
 /* Logger is powered by the inverter: offline at night, show 0 W then */
 static void push_offline(const struct inverter *inv, const struct domoticz *dz,
 			 long last_total)
@@ -260,10 +307,11 @@ int main(int argc, char **argv)
 	const char *section = NULL, *confdir = NULL;
 	struct inverter inv = { 0 };
 	struct domoticz dz = { 0 };
+	struct pvoutput pvo = { 0 };
 	struct sofar_data d;
 	struct timespec t0, t1;
 	int once = 0, dry = 0, verbose = 0, online = -1;
-	long last_total = -1;
+	long last_total = -1, last_pvo = -1;
 	int c, rc, ok;
 
 	while ((c = getopt(argc, argv, "s:1nvC:h")) != -1) {
@@ -283,7 +331,7 @@ int main(int argc, char **argv)
 
 	if (sofar_nitems > sizeof(inv.idx) / sizeof(inv.idx[0]))
 		return 1;
-	if (load_config(confdir, section, &inv, &dz))
+	if (load_config(confdir, section, &inv, &dz, &pvo))
 		return 1;
 
 	signal(SIGTERM, on_signal);
@@ -292,6 +340,9 @@ int main(int argc, char **argv)
 
 	syslog(LOG_INFO, "%s: logger %s:%d S/N %u, every %d s", inv.name,
 	       inv.host, inv.port, (unsigned)inv.serial, inv.interval);
+	if (*pvo.api_key)
+		syslog(LOG_INFO, "%s: PVOutput system %s every %d s", inv.name,
+		       pvo.system_id, pvo.interval);
 
 	while (!stop) {
 		clock_gettime(CLOCK_MONOTONIC, &t0);
@@ -306,6 +357,12 @@ int main(int argc, char **argv)
 				print_json(&d);
 			else
 				push(&inv, &dz, &d);
+			/* -5 s: reads drift by a second or two per interval */
+			if ((*pvo.api_key || (dry && *pvo.system_id)) && (last_pvo < 0 ||
+					     t0.tv_sec - last_pvo >= pvo.interval - 5)) {
+				upload(&pvo, &d, dry);
+				last_pvo = t0.tv_sec;
+			}
 		} else {
 			if (online != 0)
 				syslog(LOG_INFO, "%s: inverter offline: %s", inv.name,

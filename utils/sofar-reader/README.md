@@ -6,8 +6,10 @@ reads a Sofar K-TLX inverter through a Solarman LSW-3/LSE Wi-Fi data logger
 JSON API. It replaces the Python `InverterData.py` from
 [Sofar_LSW3](https://github.com/kofec/Sofar_LSW3).
 
-Only dependency is `libuci`. No Python, no TLS: uploading to PVOutput is
-left to Domoticz (see [PVOutput](#pvoutput)).
+Dependencies are `libuci` and `libcurl`. No Python. The optional PVOutput
+upload uses libcurl over HTTPS; a router running Domoticz already has
+libcurl and OpenSSL installed and loaded, so it adds no flash (see
+[PVOutput](#pvoutput)).
 
 | | Python 3 + gw2pvo | sofar-reader |
 |---|---|---|
@@ -60,6 +62,11 @@ config inverter 'ludynia'
 | `idx_energy` | - | Domoticz *Electric (Instant+Counter)*, gets `output_power;total_energy*1000` (W;Wh) |
 | `idx_status` | - | Domoticz *Text*, gets `Normal` or `FAULT: ID01 ...`; sent only when it changes |
 | `idx_<name>` | - | any numeric value listed by `sofar-reader -n`, e.g. `idx_pv1_power`, `idx_l1_voltage`, `idx_module_temp` |
+| `pvo_system_id` | - | PVOutput system id; empty = no upload |
+| `pvo_api_key_file` | - | file with the PVOutput API key, e.g. `/root/lib/secrets.conf` |
+| `pvo_api_key_name` | - | key name in that file (`name = key` lines); unset = first non-comment line |
+| `pvo_api_key` | - | the key itself, if you do not mind it in `/etc/config` and its backups |
+| `pvo_interval` | 300 | seconds between uploads, should match the PVOutput status interval |
 
 Domoticz device types that fit: *Voltage* for `*_voltage`, *Current
 (Ampere 1 phase)* for `*_current`, *Temperature* for `*_temp`, *Custom
@@ -69,14 +76,17 @@ auth, *Allow Basic-Auth authentication over plain HTTP* must be enabled).
 
 ## PVOutput
 
-Domoticz has no PVOutput upload hardware (only *PVOutput (Input)*), so
-[files/pvoutput.lua](files/pvoutput.lua) is a dzVents script doing what
-gw2pvo did: every 5 minutes it posts energy today (v1), power (v2) and
-L1 voltage (v6). It needs three devices fed by sofar-reader: `idx_energy`,
-`idx_today_energy` (Custom sensor, Wh) and `idx_l1_voltage` (Voltage).
-Domoticz does the HTTPS request with its own libcurl, the router side
-needs no TLS. Paste the script in *Setup -> More Options -> Events* and
-fill in the device names, system id and API key.
+With `pvo_system_id` and a key, every `pvo_interval` seconds sofar-reader
+posts what gw2pvo did to `addstatus.jsp`: power (v2), energy today (v1)
+and L1 voltage (v6), stamped with the router's local time. Nothing is sent
+while the inverter is offline. A failed request (a TLS handshake on a busy
+router can time out) is retried once after 5 s, then logged and dropped.
+
+The libcurl handle is freed after each request. Measured on an R6220 with
+the `curl` tool: one HTTPS request peaks at 1.4 MB private memory, the
+4.2 MB of libcurl/libssl/libcrypto pages are shared with Domoticz.
+
+`sofar-reader -n` logs the request it would send without sending it.
 
 ## Testing
 
