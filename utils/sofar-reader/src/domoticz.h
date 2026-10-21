@@ -18,4 +18,7 @@ int domoticz_udevice(const struct domoticz *dz, int idx, int nvalue,
 int domoticz_notify(const struct domoticz *dz, const char *subject,
 		    const char *body);
 
+/* param=getSunRiseSet: today's sunrise and sunset, minutes since midnight */
+int domoticz_sun(const struct domoticz *dz, int *sunrise, int *sunset);
+
 #endif

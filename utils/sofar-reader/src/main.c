@@ -19,6 +19,7 @@
 #include "pvoutput.h"
 #include "sofar.h"
 #include "solarman.h"
+#include "uciutil.h"
 
 struct inverter {
 	char name[32];
@@ -47,61 +48,6 @@ static void on_signal(int sig)
 	stop = 1;
 }
 
-static const char *opt_str(struct uci_context *ctx, struct uci_section *s,
-			   const char *name, const char *def)
-{
-	const char *v = s ? uci_lookup_option_string(ctx, s, name) : NULL;
-
-	return v && *v ? v : def;
-}
-
-static long opt_num(struct uci_context *ctx, struct uci_section *s,
-		    const char *name, long def)
-{
-	const char *v = opt_str(ctx, s, name, NULL);
-
-	return v ? strtol(v, NULL, 0) : def;
-}
-
-static struct uci_section *find_section(struct uci_package *pkg,
-					const char *type, const char *name)
-{
-	struct uci_element *e;
-
-	uci_foreach_element(&pkg->sections, e) {
-		struct uci_section *s = uci_to_section(e);
-
-		if (strcmp(s->type, type))
-			continue;
-		if (!name || !strcmp(e->name, name))
-			return s;
-	}
-	return NULL;
-}
-
-static void load_pvoutput(struct uci_context *ctx, struct uci_section *s,
-			  const char *name, struct pvoutput *pvo)
-{
-	const char *file = opt_str(ctx, s, "pvo_api_key_file", NULL);
-
-	snprintf(pvo->system_id, sizeof(pvo->system_id), "%s",
-		 opt_str(ctx, s, "pvo_system_id", ""));
-	snprintf(pvo->api_key, sizeof(pvo->api_key), "%s",
-		 opt_str(ctx, s, "pvo_api_key", ""));
-	pvo->interval = opt_num(ctx, s, "pvo_interval", 300);
-	pvo->timeout = 20;
-
-	if (!*pvo->system_id) {
-		pvo->api_key[0] = 0;
-		return;
-	}
-	if (!*pvo->api_key && file &&
-	    pvoutput_key_from_file(pvo, file, opt_str(ctx, s, "pvo_api_key_name", NULL)))
-		syslog(LOG_WARNING, "%s: no PVOutput API key in %s", name, file);
-	if (!*pvo->api_key)
-		syslog(LOG_WARNING, "%s: PVOutput upload disabled, no API key", name);
-}
-
 static int load_config(const char *confdir, const char *section,
 		       struct inverter *inv, struct domoticz *dz,
 		       struct pvoutput *pvo)
@@ -121,12 +67,7 @@ static int load_config(const char *confdir, const char *section,
 		goto out;
 	}
 
-	s = find_section(pkg, "domoticz", NULL);
-	snprintf(dz->host, sizeof(dz->host), "%s", opt_str(ctx, s, "host", "127.0.0.1"));
-	dz->port = opt_num(ctx, s, "port", 8080);
-	dz->timeout = opt_num(ctx, s, "timeout", 5);
-	domoticz_set_auth(dz, opt_str(ctx, s, "username", NULL),
-			  opt_str(ctx, s, "password", NULL));
+	load_domoticz(ctx, pkg, dz);
 
 	s = find_section(pkg, "inverter", section);
 	if (!s) {
@@ -265,22 +206,20 @@ static void push(const struct inverter *inv, const struct domoticz *dz,
 /* Same values gw2pvo sent: v2 power, v1 energy today, v6 L1 voltage */
 static void upload(const struct pvoutput *pvo, const struct sofar_data *d, int dry)
 {
-	const struct sofar_item *it = sofar_find("l1_voltage");
-	char volt[24];
-	long power, today, v;
-	int dec, ok;
+	struct pvo_point pt = { .t = time(NULL) };
+	int ok;
 
-	power = get(d, "output_power", &ok);
+	pt.power_w = get(d, "output_power", &ok);
 	if (!ok)
 		return;
-	today = get(d, "today_energy", &ok);
+	pt.energy_wh = get(d, "today_energy", &ok);
 	if (!ok)
-		today = -1;
-	if (it && !sofar_value(d, it, &v, &dec))
-		sofar_format(volt, sizeof(volt), v, dec);
-	else
-		it = NULL;
-	pvoutput_add_status(pvo, time(NULL), power, today, it ? volt : NULL, dry);
+		pt.energy_wh = -1;
+	/* l1_voltage is in 0.1 V, the raw register value */
+	pt.voltage_dv = get(d, "l1_voltage", &ok);
+	if (!ok)
+		pt.voltage_dv = 0;
+	pvoutput_add_status(pvo, &pt, dry);
 }
 
 /* Logger is powered by the inverter: offline at night, show 0 W then */

@@ -10,19 +10,31 @@ struct pvoutput {
 	int timeout;		/* per request, whole transfer */
 };
 
-/*
- * Read the API key from a file kept outside the package config, e.g.
- * /root/lib/secrets.conf. With a name, the line "name = key" is used,
- * without one the first line that is not a comment.
- */
-int pvoutput_key_from_file(struct pvoutput *p, const char *file, const char *name);
+/* One status: v2 power [W], v1 energy today [Wh], v6 voltage [0.1 V] */
+struct pvo_point {
+	time_t t;		/* router local time is used for d and t */
+	long power_w;
+	long energy_wh;		/* < 0 = not sent */
+	long voltage_dv;	/* <= 0 = not sent */
+};
+
+/* What PVOutput has for one day, per minute of the day */
+struct pvo_day {
+	unsigned char have[1440];
+	long energy_wh[1440];	/* -1 when the status has no energy (NaN) */
+	int count;
+};
+
+/* POST addstatus.jsp. With dry set, only log what would be sent. */
+int pvoutput_add_status(const struct pvoutput *p, const struct pvo_point *pt, int dry);
 
 /*
- * POST addstatus.jsp: v2 power [W], v1 energy today [Wh] (skipped when < 0),
- * v6 voltage [V] (skipped when NULL). Date and time are the router's local
- * time t. With dry set, only log what would be sent.
+ * POST addbatchstatus.jsp, 30 statuses per request. Returns the number
+ * PVOutput accepted, or -1 when a request failed.
  */
-int pvoutput_add_status(const struct pvoutput *p, time_t t, long power_w,
-			long energy_wh, const char *voltage, int dry);
+int pvoutput_add_batch(const struct pvoutput *p, const struct pvo_point *pts, int n);
+
+/* GET getstatus.jsp?h=1 for day "YYYYMMDD"; a day without data is no error */
+int pvoutput_get_day(const struct pvoutput *p, const char *ymd, struct pvo_day *day);
 
 #endif

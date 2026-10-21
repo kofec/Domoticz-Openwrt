@@ -62,10 +62,14 @@ static void urlencode(char *dst, size_t len, const char *src)
 	dst[o] = 0;
 }
 
-/* GET /json.htm?<query>, "what" names the request in the log */
-static int request(const struct domoticz *dz, const char *query, const char *what)
+/*
+ * GET /json.htm?<query>, "what" names the request in the log. The whole
+ * reply (headers and body) is copied to out when it is given.
+ */
+static int request(const struct domoticz *dz, const char *query, const char *what,
+		   char *out, size_t outlen)
 {
-	char req[1280], resp[1024];
+	char req[1280], resp[2048];
 	size_t got = 0;
 	ssize_t n;
 	int fd, len;
@@ -110,7 +114,34 @@ static int request(const struct domoticz *dz, const char *query, const char *wha
 		syslog(LOG_WARNING, "domoticz %s: rejected", what);
 		return -1;
 	}
+	if (out)
+		snprintf(out, outlen, "%s", resp);
 	return 0;
+}
+
+/* "07:13" after "key" : in a JSON reply -> minutes since midnight */
+static int json_hhmm(const char *json, const char *key)
+{
+	const char *p = strstr(json, key);
+	int h, m;
+
+	if (!p || !(p = strchr(p + strlen(key), ':')) || !(p = strchr(p, '"')))
+		return -1;
+	if (sscanf(p + 1, "%d:%d", &h, &m) != 2 || h < 0 || h > 23 || m < 0 || m > 59)
+		return -1;
+	return h * 60 + m;
+}
+
+int domoticz_sun(const struct domoticz *dz, int *sunrise, int *sunset)
+{
+	char resp[2048];
+
+	if (request(dz, "type=command&param=getSunRiseSet", "sunrise/sunset",
+		    resp, sizeof(resp)))
+		return -1;
+	*sunrise = json_hhmm(resp, "\"Sunrise\"");
+	*sunset = json_hhmm(resp, "\"Sunset\"");
+	return *sunrise < 0 || *sunset < 0 ? -1 : 0;
 }
 
 int domoticz_udevice(const struct domoticz *dz, int idx, int nvalue,
@@ -123,7 +154,7 @@ int domoticz_udevice(const struct domoticz *dz, int idx, int nvalue,
 		 "type=command&param=udevice&idx=%d&nvalue=%d&svalue=%s",
 		 idx, nvalue, val);
 	snprintf(what, sizeof(what), "idx %d", idx);
-	if (request(dz, query, what))
+	if (request(dz, query, what, NULL, 0))
 		return -1;
 	syslog(LOG_DEBUG, "domoticz idx %d <- %s", idx, svalue);
 	return 0;
@@ -139,7 +170,7 @@ int domoticz_notify(const struct domoticz *dz, const char *subject,
 	snprintf(query, sizeof(query),
 		 "type=command&param=sendnotification&subject=%s&body=%s",
 		 subj, text);
-	if (request(dz, query, "notification"))
+	if (request(dz, query, "notification", NULL, 0))
 		return -1;
 	syslog(LOG_INFO, "notification sent: %s - %s", subject, body);
 	return 0;
