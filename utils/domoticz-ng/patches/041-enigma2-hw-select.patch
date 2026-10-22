@@ -1,4 +1,4 @@
-From 4861e0bb9d078fc7f09217229da532f3eb11e0b9 Mon Sep 17 00:00:00 2001
+From 490867e6842b4768f2a5aa748a76d71ccdc2e651 Mon Sep 17 00:00:00 2001
 From: Kofec <18610805+kofec@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 21:25:03 +0200
 Subject: [PATCH] Enigma2: hardware selection module ENIGMA2 (on top of 030)

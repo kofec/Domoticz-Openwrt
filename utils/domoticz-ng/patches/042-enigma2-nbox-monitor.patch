@@ -1,4 +1,4 @@
-From 12f9ec899919278a00a78b651d8e66bc0dfd7b74 Mon Sep 17 00:00:00 2001
+From 84273892e421a4201df64facb6c41b9cf4fe45f1 Mon Sep 17 00:00:00 2001
 From: Kofec <18610805+kofec@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 21:22:37 +0200
 Subject: [PATCH] Enigma2: optional nBox monitor devices (Mode4)
@@ -181,7 +181,7 @@ index 51427d81..7e3b1e4e 100644
 +	</tr>
  </table>
 diff --git a/www/app/hardware/extra/Enigma2Params.js b/www/app/hardware/extra/Enigma2Params.js
-index 7228cb93..7ea1d12f 100644
+index 3e7435be..3ed56fa4 100644
 --- a/www/app/hardware/extra/Enigma2Params.js
 +++ b/www/app/hardware/extra/Enigma2Params.js
 @@ -9,6 +9,7 @@ extraHWInitParams = function (data) {
@@ -189,10 +189,10 @@ index 7228cb93..7ea1d12f 100644
  	$('#hardwarecontent #divextrahwparams #deepstandbyenigma2').prop('checked', data["Mode2"] == 1);
  	$('#hardwarecontent #divextrahwparams #channelnameenigma2').prop('checked', data["Mode3"] == 1);
 +	$('#hardwarecontent #divextrahwparams #monitorenigma2').prop('checked', data["Mode4"] == 1);
+ 	$("#hardwarecontent #divremote #tcpaddress").val(data["Address"] ? data["Address"] : "");
  	$("#hardwarecontent #divremote").show();
  	$("#hardwarecontent #divlogin").show();
- }
-@@ -18,6 +19,7 @@ extraHWUpdateParams = function(validators) {
+@@ -19,6 +20,7 @@ extraHWUpdateParams = function(validators) {
  	data["Mode1"] = $("#hardwarecontent #divextrahwparams #updatefrequencyenigma2").val();
  	data["Mode2"] = $("#hardwarecontent #divextrahwparams #deepstandbyenigma2").is(":checked") ? 1 : 0;
  	data["Mode3"] = $("#hardwarecontent #divextrahwparams #channelnameenigma2").is(":checked") ? 1 : 0;

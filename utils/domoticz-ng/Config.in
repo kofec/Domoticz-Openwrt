@@ -167,10 +167,10 @@ config DOMOTICZ-NG_HW_ENEVER
 	  Enever Dutch Electricity/Gas Price Feed
 
 config DOMOTICZ-NG_HW_ENIGMA2
-	bool "ENIGMA2: Enigma2 receiver with LAN (OpenWebif) interface"
+	bool "ENIGMA2: Enigma2 receiver"
 	default n
 	help
-	  Enigma2 receiver with LAN (OpenWebif) interface
+	  Enigma2 receiver
 
 config DOMOTICZ-NG_HW_ENOCEAN
 	bool "ENOCEAN: EnOcean USB (ESP2) (+1)"

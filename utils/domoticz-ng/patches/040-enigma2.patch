@@ -1,4 +1,4 @@
-From d133b14c805847a45782504613bba75918fc2f3b Mon Sep 17 00:00:00 2001
+From cace07d7f6162275a9dee1482f535fc84907287f Mon Sep 17 00:00:00 2001
 From: Kofec <18610805+kofec@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 21:21:41 +0200
 Subject: [PATCH] Enigma2: native hardware for Enigma2 receivers (OpenWebif)
@@ -30,10 +30,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  main/mainworker.cpp                       |   4 +
  msbuild/domoticz.vcxproj                  |   2 +
  msbuild/domoticz.vcxproj.filters          |   9 +
- www/app/hardware/Hardware.js              |   1 +
+ www/app/hardware/Hardware.js              |   3 +-
  www/app/hardware/extra/Enigma2Params.html |  30 ++
- www/app/hardware/extra/Enigma2Params.js   |  24 ++
- 11 files changed, 465 insertions(+)
+ www/app/hardware/extra/Enigma2Params.js   |  25 ++
+ 11 files changed, 467 insertions(+), 1 deletion(-)
  create mode 100644 hardware/Enigma2.cpp
  create mode 100644 hardware/Enigma2.h
  create mode 100644 www/app/hardware/extra/Enigma2Params.html
@@ -455,14 +455,14 @@ index 00000000..2c4fdd93
 +	std::shared_ptr<std::thread> m_thread;
 +};
 diff --git a/main/RFXNames.cpp b/main/RFXNames.cpp
-index ae2910e7..76d5467a 100755
+index ae2910e7..f334168e 100755
 --- a/main/RFXNames.cpp
 +++ b/main/RFXNames.cpp
 @@ -286,6 +286,7 @@ static const STR_TABLE_SINGLE HardwareTypeTable[] = {
  	{ HTYPE_DaikinModbus, "Daikin Altherma (Modbus TCP via Homehub)", "DaikinHH" },
  	{ HTYPE_OpenMeteo, "Open-Meteo (Weather Lookup)", "OpenMeteo" },
  	{ HTYPE_Matter, "Matter (python-matterjs-server)", "Matter" },
-+	{ HTYPE_Enigma2, "Enigma2 receiver with LAN (OpenWebif) interface", "Enigma2" },
++	{ HTYPE_Enigma2, "Enigma2 receiver", "Enigma2" },
  	{ 0, nullptr, nullptr },
  };
  
@@ -563,17 +563,26 @@ index a4fa46ae..73be935f 100644
        <Filter>Devices\Mitsubishi_WF_RAC</Filter>
      </ClCompile>
 diff --git a/www/app/hardware/Hardware.js b/www/app/hardware/Hardware.js
-index a02e06f0..3d14aecc 100644
+index a02e06f0..a5973ba8 100644
 --- a/www/app/hardware/Hardware.js
 +++ b/www/app/hardware/Hardware.js
 @@ -13,6 +13,7 @@ define(['app'], function (app) {
  		'MQTT Auto Discovery Client Gateway with LAN interface': ['MQTTParams', 3],
  		'RFLink Gateway MQTT': ['MQTTParams', 4],
  		'Tado Thermostat': 'TadoParams',
-+		'Enigma2 receiver with LAN (OpenWebif) interface': 'Enigma2Params',
++		'Enigma2 receiver': 'Enigma2Params',
  	};
  
  	app.controller('HardwareController', function ($scope, $rootScope, $timeout, $http) {
+@@ -4145,7 +4146,7 @@ define(['app'], function (app) {
+ 
+ 							var SerialName = "Unknown!?";
+ 							var intport = 0;
+-							if ((HwTypeStr.indexOf("LAN") >= 0) || (HwTypeStr.indexOf("MySensors Gateway with MQTT") >= 0) || (HwTypeStr.indexOf("Domoticz") >= 0) || (HwTypeStr.indexOf("Harmony") >= 0) || (HwTypeStr.indexOf("Philips Hue") >= 0) || (HwTypeStr.indexOf("Daikin") >= 0)) {
++							if ((HwTypeStr.indexOf("LAN") >= 0) || (HwTypeStr.indexOf("MySensors Gateway with MQTT") >= 0) || (HwTypeStr.indexOf("Domoticz") >= 0) || (HwTypeStr.indexOf("Harmony") >= 0) || (HwTypeStr.indexOf("Philips Hue") >= 0) || (HwTypeStr.indexOf("Daikin") >= 0) || (HwTypeStr.indexOf("Enigma2 receiver") >= 0)) {
+ 								SerialName = item.Port;
+ 							}
+ 							else if ((item.Type == 7) || (item.Type == 11)) {
 diff --git a/www/app/hardware/extra/Enigma2Params.html b/www/app/hardware/extra/Enigma2Params.html
 new file mode 100644
 index 00000000..51427d81
@@ -612,10 +621,10 @@ index 00000000..51427d81
 +</table>
 diff --git a/www/app/hardware/extra/Enigma2Params.js b/www/app/hardware/extra/Enigma2Params.js
 new file mode 100644
-index 00000000..7228cb93
+index 00000000..3e7435be
 --- /dev/null
 +++ b/www/app/hardware/extra/Enigma2Params.js
-@@ -0,0 +1,24 @@
+@@ -0,0 +1,25 @@
 +
 +extraHWValidateParams = function (data, validators) {
 +	return validators["Integer"](data["Mode1"], 10, 3600, " Poll Interval");
@@ -627,6 +636,7 @@ index 00000000..7228cb93
 +	$('#hardwarecontent #divextrahwparams #updatefrequencyenigma2').val(data["Mode1"]);
 +	$('#hardwarecontent #divextrahwparams #deepstandbyenigma2').prop('checked', data["Mode2"] == 1);
 +	$('#hardwarecontent #divextrahwparams #channelnameenigma2').prop('checked', data["Mode3"] == 1);
++	$("#hardwarecontent #divremote #tcpaddress").val(data["Address"] ? data["Address"] : "");
 +	$("#hardwarecontent #divremote").show();
 +	$("#hardwarecontent #divlogin").show();
 +}
