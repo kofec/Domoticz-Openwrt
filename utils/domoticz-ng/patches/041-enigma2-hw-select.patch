@@ -1,0 +1,54 @@
+From 4861e0bb9d078fc7f09217229da532f3eb11e0b9 Mon Sep 17 00:00:00 2001
+From: Kofec <18610805+kofec@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 21:25:03 +0200
+Subject: [PATCH] Enigma2: hardware selection module ENIGMA2 (on top of 030)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ cmake/HardwareModules.cmake | 3 +++
+ main/mainworker.cpp         | 4 ++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/cmake/HardwareModules.cmake b/cmake/HardwareModules.cmake
+index 2ff69f2c..78346838 100644
+--- a/cmake/HardwareModules.cmake
++++ b/cmake/HardwareModules.cmake
+@@ -361,6 +361,9 @@ dz_hardware_module(MATTER
+   TYPES HTYPE_Matter
+   SOURCES hardware/Matter.cpp
+           hardware/ASyncWebsocket.cpp)
++dz_hardware_module(ENIGMA2
++  TYPES HTYPE_Enigma2
++  SOURCES hardware/Enigma2.cpp)
+ 
+ set(_dzhw_built)
+ set(_dzhw_skipped)
+diff --git a/main/mainworker.cpp b/main/mainworker.cpp
+index d356af5a..69f4be6b 100644
+--- a/main/mainworker.cpp
++++ b/main/mainworker.cpp
+@@ -159,7 +159,9 @@
+ #include "../hardware/Enever.h"
+ #include "../hardware/MitsubishiWF.h"
+ #include "../hardware/Matter.h"
++#ifdef WITH_HW_ENIGMA2
+ #include "../hardware/Enigma2.h"
++#endif
+ 
+ // load notifications configuration
+ #include "../notifications/NotificationHelper.h"
+@@ -1321,9 +1323,11 @@ bool MainWorker::AddHardwareFromParams(
+ 		}
+ 		break;
+ #endif
++#ifdef WITH_HW_ENIGMA2
+ 	case HTYPE_Enigma2:
+ 		pHardware = new CEnigma2(ID, Address, Port, Username, Password, Mode1, Mode2, Mode3);
+ 		break;
++#endif
+ 
+ 	default:
+ 		_log.Log(LOG_ERROR, "Hardware: %s (%s) not started, this hardware type is not included in this build", Name.c_str(), Hardware_Type_Desc(Type));
+-- 
+2.55.0.windows.3
+
