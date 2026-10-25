@@ -172,6 +172,12 @@ config DOMOTICZ-NG_HW_ENIGMA2
 	help
 	  Enigma2 receiver
 
+config DOMOTICZ-NG_HW_TUYALAN
+	bool "TUYALAN: TinyTuya (Cloud)"
+	default n
+	help
+	  TinyTuya devices discovered through the Tuya IoT Cloud.
+
 config DOMOTICZ-NG_HW_ENOCEAN
 	bool "ENOCEAN: EnOcean USB (ESP2) (+1)"
 	default n
