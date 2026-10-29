@@ -9,21 +9,21 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=domoticz
 PKG_VERSION_MAJOR:=2026.4
+# Sources come from the openwrt branch of github.com/kofec/domoticz:
+# upstream development plus our commits (OpenWrt build fixes, hardware
+# selection, Enigma2, TinyTuya) instead of patches in this feed.
+# PKG_VERSION_PATCH = upstream revision the branch sits on (623d51af).
+# Every PKG_COMMIT is tagged openwrt-$(PKG_VERSION)-r$(PKG_RELEASE) in the
+# fork, so it stays downloadable after the branch is rebased.
 PKG_VERSION_PATCH:=18490
-PKG_COMMIT:=623d51af501fba247371dcf11f572a1ba64e6b96
+PKG_COMMIT:=e2c475aa4847b38fedf043fe9e4c671d8340830a
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
-ifeq ($(PKG_COMMIT),)
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_VERSION)/$(PKG_SOURCE)
-PKG_HASH:=355057204437e295e3e3147623026481b500059ef24f59b59e3e8793237ac0b2
-else
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
-PKG_SOURCE_URL:=https://github.com/domoticz/domoticz/archive/$(PKG_COMMIT)/
+PKG_SOURCE_URL:=https://github.com/kofec/domoticz/archive/$(PKG_COMMIT)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
-PKG_HASH:=b0ff25e16773567b59af66688e2a25178a9e447e7c87ca12144295638c1fbbd0
-endif
+PKG_HASH:=1c25db0bdf330e0db119c6e79be22e55f4e1bf1ad1d173af2b742b87ec1f4cd3
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
@@ -33,7 +33,7 @@ PKG_BUILD_PARALLEL:=1
 PKG_FIXUP:=autoreconf
 PKG_USE_MIPS16:=0
 
-# Hardware driver modules from patches/030 (cmake/HardwareModules.cmake),
+# Hardware driver modules from cmake/HardwareModules.cmake in the fork,
 # one DOMOTICZ-NG_HW_<NAME> option each in Config.in
 DOMOTICZ_HW_MODULES := \
 	1WIRE ACCUWEATHER AIRCONWITHME ALFENEVE ANNATHERMOSTAT ARILUX ATAGONE \
