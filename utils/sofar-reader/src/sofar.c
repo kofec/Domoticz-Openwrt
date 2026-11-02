@@ -1,6 +1,6 @@
 /*
  * Register map of Sofar K-TLX inverters, taken from SOFARMap.xml of
- * https://github.com/kofec/Sofar_LSW3
+ * https://github.com/MichaluxPL/Sofar_LSW3 (GPL-3.0)
  */
 #include <stdio.h>
 #include <string.h>

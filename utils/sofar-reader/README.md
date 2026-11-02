@@ -4,7 +4,8 @@ Small C daemon for OpenWrt (written for 24.10, e.g. Netgear R6220) that
 reads a Sofar K-TLX inverter through a Solarman LSW-3/LSE Wi-Fi data logger
 (protocol V5, TCP port 8899) and pushes the values to Domoticz over its HTTP
 JSON API. It replaces the Python `InverterData.py` from
-[Sofar_LSW3](https://github.com/kofec/Sofar_LSW3).
+[Sofar_LSW3](https://github.com/MichaluxPL/Sofar_LSW3) by MichaluxPL, whose
+`SOFARMap.xml` (GPL-3.0) is the source of the register map.
 
 Dependencies are `libuci` and `libcurl`. No Python. The optional PVOutput
 upload uses libcurl over HTTPS; a router running Domoticz already has
