@@ -12,18 +12,18 @@ PKG_VERSION_MAJOR:=2026.4
 # Sources come from the openwrt branch of github.com/kofec/domoticz:
 # upstream development plus our commits (OpenWrt build fixes, hardware
 # selection, Enigma2, TinyTuya) instead of patches in this feed.
-# PKG_VERSION_PATCH = upstream revision the branch sits on (623d51af).
+# PKG_VERSION_PATCH = upstream revision the branch sits on (5fd7a0e2).
 # Every PKG_COMMIT is tagged openwrt-$(PKG_VERSION)-r$(PKG_RELEASE) in the
 # fork, so it stays downloadable after the branch is rebased.
-PKG_VERSION_PATCH:=18490
-PKG_COMMIT:=ad284db293100dfd7bdf9b1b4f83ebf38f78b6c4
+PKG_VERSION_PATCH:=18605
+PKG_COMMIT:=83ec7c1a9091bb7d6b0d31c6f0422d370a1b801c
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
-PKG_RELEASE:=5
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
 PKG_SOURCE_URL:=https://github.com/kofec/domoticz/archive/$(PKG_COMMIT)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
-PKG_HASH:=9cace5ccf2027064d3da0d0f3d5212aeb73242de2f6aeb82dfee442c0031123c
+PKG_HASH:=a737982f828af379cb929ae3ca4268694c3b227c8a84598252063933fd56c9d2
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
@@ -150,7 +150,7 @@ endif
 ifeq ($(CONFIG_DOMOTICZ-NG_HW_SELECT),y)
 CMAKE_OPTIONS += \
 	-DINCLUDE_HARDWARE_ALL=OFF \
-	$(foreach hw,$(DOMOTICZ_HW_MODULES),$(if $(CONFIG_DOMOTICZ-NG_HW_$(hw)),-DINCLUDE_HARDWARE_$(hw)=ON))
+	$(foreach hw,$(DOMOTICZ_HW_MODULES),-DINCLUDE_HARDWARE_$(hw)=$(if $(CONFIG_DOMOTICZ-NG_HW_$(hw)),ON,OFF))
 endif
 
 define Build/Prepare
