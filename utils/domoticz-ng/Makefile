@@ -13,25 +13,36 @@ PKG_VERSION_MAJOR:=2026.4
 # upstream development plus our commits (OpenWrt build fixes, hardware
 # selection, Enigma2, TinyTuya) instead of patches in this feed.
 # PKG_VERSION_PATCH = upstream revision the branch sits on (5fd7a0e2).
-# Every PKG_COMMIT is tagged openwrt-$(PKG_VERSION)-r$(PKG_RELEASE) in the
-# fork, so it stays downloadable after the branch is rebased.
+# Every PKG_COMMIT is tagged openwrt-$(PKG_VERSION)-r<release> in the fork,
+# so it stays downloadable after the branch is rebased.
 PKG_VERSION_PATCH:=18605
 PKG_COMMIT:=d8ef987378e3f0f783f3f6e47df086e47a3cbd3f
 PKG_VERSION:=$(PKG_VERSION_MAJOR).$(PKG_VERSION_PATCH)
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_COMMIT).tar.gz
-PKG_SOURCE_URL:=https://github.com/kofec/domoticz/archive/$(PKG_COMMIT)/
+# The web server is the extern/libwebem submodule, which GitHub archive
+# tarballs leave empty, so clone with git and pull in that one submodule
+# (the other extern/ libraries come from OpenWrt packages). The libwebem
+# version is whatever the fork commit pins; it is built in and linked
+# statically. patches/ only fixes its dependency lookup.
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/kofec/domoticz.git
+PKG_SOURCE_VERSION:=$(PKG_COMMIT)
+PKG_SOURCE_SUBMODULES:=extern/libwebem
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_COMMIT)
+PKG_SOURCE:=$(PKG_SOURCE_SUBDIR).tar.zst
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_COMMIT)
-PKG_HASH:=9f7f5a0452145b96ef006f20466468613a08966474f4eaae4169454410fcd25a
+PKG_MIRROR_HASH:=4c92bda9794311cdb3f6059fc72719cb63916baeef19718e63cd5ce4106f4457
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=License.txt
 
-PKG_BUILD_DEPENDS:=minizip cereal libwebem jwt-cpp DOMOTICZ-NG_PYTHON3:python3
+PKG_BUILD_DEPENDS:=minizip cereal jwt-cpp DOMOTICZ-NG_PYTHON3:python3
 PKG_BUILD_PARALLEL:=1
 PKG_FIXUP:=autoreconf
-PKG_USE_MIPS16:=0
+# PKG_USE_MIPS16 is not honoured since 23.05, only PKG_BUILD_FLAGS is.
+# lto = -flto=auto (parallel LTRANS) for compile and link.
+PKG_BUILD_FLAGS:=no-mips16 lto gc-sections
 
 # Hardware driver modules from cmake/HardwareModules.cmake in the fork,
 # one DOMOTICZ-NG_HW_<NAME> option each in Config.in
@@ -99,13 +110,12 @@ define Package/domoticz-ng/description
   Domoticz is a Home Automation System that lets you monitor and configure various devices like: Lights, Switches, various sensors/meters like Temperature, Rain, Wind, UV, Electra, Gas, Water and much more. Notifications/Alerts can be sent to any mobile device.
 endef
 
+# CMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY: config-mode find_package() must
+# not pick up the build host's cmake configs (e.g. an x86_64 jsoncpp).
+# BUILD_SHARED_LIBS stays off, so libwebem is linked into the binary.
 CMAKE_OPTIONS += \
-	-DCMAKE_EXE_LINKER_FLAGS="-latomic" \
-	-DCMAKE_CXX_FLAGS="$(TARGET_CXXFLAGS) -I$(STAGING_DIR)/usr/include/libwebem" \
-	-DUSE_SYSTEM_LIBWEBEM=ON \
-	-DWEBEM_INCLUDE_DIR=$(STAGING_DIR)/usr/include \
-	-DWEBEM_LIBRARY=$(STAGING_DIR)/usr/lib/libwebem.a \
-	-DBUILD_SHARED_LIBS=yes \
+	-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+	-DUSE_BUILTIN_LIBWEBEM=ON \
 	-DBoost_NO_BOOST_CMAKE=yes \
 	-DGIT_SUBMODULE=no \
 	-DCMAKE_BUILD_TYPE=Release \
@@ -122,8 +132,16 @@ CMAKE_OPTIONS += \
 	-DUSE_OPENSSL_STATIC=no \
 	-DWITH_LIBUSB=no
 
-TARGET_CFLAGS += -flto
-TARGET_CXXFLAGS += -DWITH_GPIO -flto
+TARGET_CXXFLAGS += -DWITH_GPIO
+TARGET_LDFLAGS += -latomic
+
+# musl fortify-headers wrap vsnprintf in an always_inline function, and
+# with LTO the final link fails on it (std::to_string: "inlining failed
+# in call to 'always_inline' 'vsnprintf': function body can be overwritten
+# at link time", openwrt/packages#29004). Upstream dropped LTO instead;
+# we keep LTO and build without the fortify wrappers, as up to 18605-r2,
+# where an explicit CMAKE_CXX_FLAGS happened to leave them out.
+TARGET_CPPFLAGS := $(filter-out -I$(TOOLCHAIN_DIR)/include/fortify,$(TARGET_CPPFLAGS))
 
 ifeq ($(CONFIG_DOMOTICZ-NG_PYTHON3),y)
 CMAKE_OPTIONS += \
@@ -158,7 +176,8 @@ define Build/Prepare
 	# Fix APPVERSION/APPDATE since we don't build from a git tree
 	sed -i 's|#define APPVERSION.[^\]*\\|#define APPVERSION $(PKG_VERSION_PATCH)\\|' \
 		$(PKG_BUILD_DIR)/getgit.cmake
-	COMMITDATE=`tar tvfz $(DL_DIR)/$(PKG_SOURCE) --full-time | sed 's/.* \(20..-..-.. ..:..:..\) domoticz-.*/\1/;q'`; \
+	# git tarballs carry the commit time as every file's mtime
+	COMMITDATE=`zstd -dcq $(DL_DIR)/$(PKG_SOURCE) | $(TAR) -tv --full-time | sed 's/.* \(20..-..-.. ..:..:..\) domoticz-.*/\1/;q'`; \
 	COMMITTS=`date --date="$$$${COMMITDATE}" +%s`; \
 	sed -i "s/#define APPDATE.*/#define APPDATE $$$${COMMITTS}\\\n\")/" $(PKG_BUILD_DIR)/getgit.cmake
 ifneq ($(PKG_COMMIT),)
@@ -166,10 +185,6 @@ ifneq ($(PKG_COMMIT),)
 	sed -i "s/#define APPHASH /#define APPHASH \\\/" $(PKG_BUILD_DIR)/getgit.cmake
 	sed -i "s/$(shell echo $(PKG_COMMIT) | cut -c1-8)/$(shell echo $(PKG_COMMIT) | cut -c1-8)\\\/" $(PKG_BUILD_DIR)/getgit.cmake
 endif
-	# Usuwamy błędne relatywne ścieżki do libwebem w kodzie źródłowym
-	$(FIND) $(PKG_BUILD_DIR) -type f \( -name "*.h" -o -name "*.cpp" \) -exec sed -i \
-		's|../extern/libwebem/include/||g; s|extern/libwebem/include/||g; s|../extern/libwebem/src/sha1.h|libwebem/sha1.h|g' {} +
-
 	# Remove unwanted scripts
 	cd $(PKG_BUILD_DIR)/scripts && rm -rf \
 		buienradar_rain_example.pl \
